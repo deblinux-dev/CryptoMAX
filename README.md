@@ -202,7 +202,7 @@ MIT — Без гарантий (as is). Остерегайтесь шпионс
 
 ## Благодарности
 
-- Стегонатор — движок шифрования, спасибо мне, Алисе, Гигачату и Qwen 😃
+- Стегонатор — движок шифрования, спасибо мне и Гигачату 🙃
 - [Lucide](https://lucide.dev/) — иконки
 - [archiver](https://www.npmjs.com/package/archiver) + [archiver-zip-encrypted](https://www.npmjs.com/package/archiver-zip-encrypted) — ZIP с AES-256
 - [7zip-bin](https://www.npmjs.com/package/7zip-bin) — бинарник 7za для распаковки
