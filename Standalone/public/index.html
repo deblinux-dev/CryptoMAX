@@ -1,0 +1,1376 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#0b0d13">
+  <title>Стегонатор — Стеганография и шифрование</title>
+  <link rel="stylesheet" href="css/messenger.css">
+  <link rel="icon" href="logo.svg" type="image/svg+xml">
+</head>
+<body>
+
+<!-- ═══ Inline SVG Sprite (primary — ensures icons work in dangerouslySetInnerHTML) ═══ -->
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+<!-- Shield/Lock - for encryption tab, header logo -->
+<symbol id="icon-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></symbol>
+<!-- Document/Pen - for steganography tab -->
+<symbol id="icon-file-text" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></symbol>
+<!-- Eye-off -->
+<symbol id="icon-eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></symbol>
+<!-- Text/Type -->
+<symbol id="icon-type" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></symbol>
+<!-- Archive -->
+<symbol id="icon-archive" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></symbol>
+<!-- Smiley -->
+<symbol id="icon-smile" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></symbol>
+<!-- Globe -->
+<symbol id="icon-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></symbol>
+<!-- Keyboard -->
+<symbol id="icon-keyboard" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="6" y1="8" x2="6.01" y2="8"/><line x1="10" y1="8" x2="10.01" y2="8"/><line x1="14" y1="8" x2="14.01" y2="8"/><line x1="18" y1="8" x2="18.01" y2="8"/><line x1="6" y1="12" x2="6.01" y2="12"/><line x1="10" y1="12" x2="10.01" y2="12"/><line x1="14" y1="12" x2="14.01" y2="12"/><line x1="18" y1="12" x2="18.01" y2="12"/><line x1="8" y1="16" x2="16" y2="16"/></symbol>
+<!-- Lock -->
+<symbol id="icon-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol>
+<!-- Unlock -->
+<symbol id="icon-unlock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></symbol>
+<!-- Wrench -->
+<symbol id="icon-wrench" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></symbol>
+<!-- Settings -->
+<symbol id="icon-settings" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></symbol>
+<!-- Copy -->
+<symbol id="icon-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></symbol>
+<!-- Eye -->
+<symbol id="icon-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></symbol>
+<!-- Send -->
+<symbol id="icon-send" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></symbol>
+<!-- Message -->
+<symbol id="icon-message" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></symbol>
+<!-- Trash -->
+<symbol id="icon-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></symbol>
+<!-- X/Close -->
+<symbol id="icon-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></symbol>
+<!-- Plus -->
+<symbol id="icon-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></symbol>
+<!-- Bridge -->
+<symbol id="icon-bridge" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></symbol>
+<!-- Check -->
+<symbol id="icon-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></symbol>
+<!-- Alert -->
+<symbol id="icon-alert" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></symbol>
+<!-- Zap -->
+<symbol id="icon-zap" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></symbol>
+<!-- Scan -->
+<symbol id="icon-scan" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></symbol>
+<!-- Sliders -->
+<symbol id="icon-sliders" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></symbol>
+<!-- Image -->
+<symbol id="icon-image" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></symbol>
+<!-- Upload -->
+<symbol id="icon-upload" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></symbol>
+<!-- Download -->
+<symbol id="icon-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></symbol>
+<!-- Search -->
+<symbol id="icon-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></symbol>
+<!-- Paperclip -->
+<symbol id="icon-paperclip" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19-9.19a6 6 0 0 0-8.49 8.49l9.19 9.19a4 4 0 0 0 5.66-5.66l-9.2-9.19a2 2 0 0 0-2.83 2.83l8.49 8.48"/></symbol>
+<!-- File -->
+<symbol id="icon-file" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></symbol>
+<!-- BarChart -->
+<symbol id="icon-bar-chart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></symbol>
+<!-- Link -->
+<symbol id="icon-link" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></symbol>
+<!-- BookOpen — for Markov text tab -->
+<symbol id="icon-book-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></symbol>
+<!-- Brain/Sparkle — for LLM stego tab -->
+<symbol id="icon-sparkles" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5L12 3z"/><path d="M5 17l.7 2.1L8 20l-2.3.7L5 23l-.7-2.3L2 20l2.3-.7L5 17z"/><path d="M19 13l.7 2.1L22 16l-2.3.7L19 19l-.7-2.3L16 16l2.3-.7L19 13z"/></symbol>
+</svg>
+
+<div class="crypto-messenger" id="cryptoMessenger">
+
+  <!-- ═══════════════════════════════════════════════════════════
+       Loading Overlay (shown while Az.js dictionaries load)
+       ═══════════════════════════════════════════════════════════ -->
+  <div class="cm-loading" id="loading">
+    <div class="cm-loading__spinner"></div>
+    <div class="cm-loading__text">Загрузка морфологических словарей…</div>
+    <div class="cm-loading__progress">
+      <div class="cm-loading__progress-bar" id="loadingProgressBar"></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       Header
+       ═══════════════════════════════════════════════════════════ -->
+  <header class="cm-header" id="header">
+    <a class="cm-header__logo" href="#">
+      <svg class="cm-icon cm-icon--lg"><use href="#icon-shield"/></svg>
+      <span>Стегонатор</span>
+    </a>
+    <div class="cm-header__status" id="connectionStatus">
+      <span class="cm-header__status-dot"></span>
+      <span>Зашифровано</span>
+    </div>
+    <div class="cm-header__spacer"></div>
+    <div class="cm-header__chat-id" id="chatIdDisplay" title="ID чата">—</div>
+    <button class="cm-header__btn" id="btnSettings" type="button" aria-label="Настройки"><svg class="cm-icon"><use href="#icon-settings"/></svg></button>
+  </header>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       Main Mode Tabs (Encryption / Steganography)
+       ═══════════════════════════════════════════════════════════ -->
+  <nav class="cm-tabs" id="mainTabs">
+    <button class="cm-tab active" data-category="encryption" type="button">
+      <svg class="cm-icon"><use href="#icon-shield"/></svg>&nbsp; Шифрование
+    </button>
+    <button class="cm-tab" data-category="steganography" type="button">
+      <svg class="cm-icon"><use href="#icon-file-text"/></svg>&nbsp; Стеганография
+    </button>
+    <button class="cm-tab" data-category="images" type="button">
+      <svg class="cm-icon"><use href="#icon-image"/></svg>&nbsp; Изображения
+    </button>
+    <button class="cm-tab" data-category="markov" type="button">
+      <svg class="cm-icon"><use href="#icon-book-open"/></svg>&nbsp; Марков текст
+    </button>
+    <button class="cm-tab" data-category="llm" type="button">
+      <svg class="cm-icon"><use href="#icon-sparkles"/></svg>&nbsp; LLM Стего
+    </button>
+  </nav>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       Sub-mode Selector (depends on active main mode)
+       ═══════════════════════════════════════════════════════════ -->
+
+  <!-- Encryption sub-modes -->
+  <div class="cm-subtabs" id="subtabsEncryption" data-category-subtabs="encryption">
+    <button class="cm-subtab" data-mode="invisible" type="button"><svg class="cm-icon cm-icon--sm"><use href="#icon-eye-off"/></svg> Невидимые</button>
+    <button class="cm-subtab" data-mode="base64" type="button"><svg class="cm-icon cm-icon--sm"><use href="#icon-type"/></svg> Base64</button>
+    <button class="cm-subtab" data-mode="compression" type="button"><svg class="cm-icon cm-icon--sm"><use href="#icon-archive"/></svg> Deflate+B64</button>
+    <button class="cm-subtab" data-mode="emoji" type="button"><svg class="cm-icon cm-icon--sm"><use href="#icon-smile"/></svg> Эмодзи</button>
+    <button class="cm-subtab" data-mode="chinese" type="button"><svg class="cm-icon cm-icon--sm"><use href="#icon-globe"/></svg> Иероглифы</button>
+    <button class="cm-subtab" data-mode="layout" type="button"><svg class="cm-icon cm-icon--sm"><use href="#icon-keyboard"/></svg> Раскладка</button>
+    <button class="cm-subtab active" data-mode="aes256" type="button"><svg class="cm-icon cm-icon--sm"><use href="#icon-lock"/></svg> AES-256</button>
+    <button class="cm-subtab" data-mode="compact" type="button"><svg class="cm-icon cm-icon--sm"><use href="#icon-lock"/></svg> Компактный</button>
+  </div>
+
+  <!-- Steganography sub-modes -->
+  <div class="cm-subtabs cm-hidden" id="subtabsSteganography" data-category-subtabs="steganography">
+    <button class="cm-subtab active" data-mode="stego-encode" type="button"><svg class="cm-icon cm-icon--sm"><use href="#icon-file-text"/></svg> Кодирование</button>
+    <button class="cm-subtab" data-mode="stego-decode" type="button"><svg class="cm-icon cm-icon--sm"><use href="#icon-unlock"/></svg> Декодирование</button>
+    <button class="cm-subtab" data-mode="stego-recovery" type="button"><svg class="cm-icon cm-icon--sm"><use href="#icon-wrench"/></svg> Восстановление</button>
+    <button class="cm-subtab" data-mode="stego-extreme" type="button"><svg class="cm-icon cm-icon--sm"><use href="#icon-zap"/></svg> Экстремальные</button>
+  </div>
+
+  <!-- Images sub-modes -->
+  <div class="cm-subtabs cm-hidden" id="subtabsImages" data-category-subtabs="images">
+    <button class="cm-subtab active" data-mode="img-encode" type="button">
+      <svg class="cm-icon cm-icon--sm"><use href="#icon-lock"/></svg> Кодирование
+    </button>
+    <button class="cm-subtab" data-mode="img-decode" type="button">
+      <svg class="cm-icon cm-icon--sm"><use href="#icon-unlock"/></svg> Декодирование
+    </button>
+  </div>
+
+  <!-- Markov sub-modes -->
+  <div class="cm-subtabs cm-hidden" id="subtabsMarkov" data-category-subtabs="markov">
+    <button class="cm-subtab active" data-mode="markov-encode" type="button">
+      <svg class="cm-icon cm-icon--sm"><use href="#icon-lock"/></svg> Кодирование
+    </button>
+    <button class="cm-subtab" data-mode="markov-decode" type="button">
+      <svg class="cm-icon cm-icon--sm"><use href="#icon-unlock"/></svg> Декодирование
+    </button>
+  </div>
+
+  <!-- LLM Stego sub-modes -->
+  <div class="cm-subtabs cm-hidden" id="subtabsLlm" data-category-subtabs="llm">
+    <button class="cm-subtab active" data-mode="llm-encode" type="button">
+      <svg class="cm-icon cm-icon--sm"><use href="#icon-lock"/></svg> Кодирование
+    </button>
+    <button class="cm-subtab" data-mode="llm-decode" type="button">
+      <svg class="cm-icon cm-icon--sm"><use href="#icon-unlock"/></svg> Декодирование
+    </button>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       Input Area (bottom, always visible — content varies by mode)
+       ═══════════════════════════════════════════════════════════ -->
+  <div class="cm-input-area" id="inputArea">
+
+    <!-- ─── Encryption Mode Input ─────────────────────────────── -->
+    <div class="cm-input-panel active" id="panelEncryption" data-category-panel="encryption">
+      <!-- Inline help -->
+      <details class="cm-help-collapsible">
+        <summary class="cm-help-collapsible__summary">📖 Справка по режимам шифрования</summary>
+        <div class="cm-help-collapsible__body">
+          <p><b>Режимы шифрования:</b></p>
+          <ul>
+            <li><b>AES-256-GCM</b> — надёжное шифрование паролем. Результат — строка Base64.</li>
+            <li><b>Невидимые пробелы</b> — AES + спец. символы (zero-width spaces). Текст выглядит как обычный.</li>
+            <li><b>Base64</b> — AES + стандартное кодирование Base64.</li>
+            <li><b>Компрессия</b> — AES + сжатие gzip. Укорачивает длинные сообщения.</li>
+            <li><b>Эмодзи</b> — AES + эмодзи. Выглядит как набор смайлов.</li>
+            <li><b>Китайские</b> — AES + китайские иероглифы.</li>
+            <li><b>Раскладка</b> — замена раскладки клавиатуры (EN↔RU). Без шифрования, только обфускация.</li>
+          </ul>
+          <p><b>Направление:</b> «Шифровать» → кодирует, «Дешифровать» → раскодирует. Расшифровка автоматически определяет тип кодировки.</p>
+          <p><b>Рекомендации:</b> Для максимальной безопасности используйте AES-256-GCM с длинным паролем. Для стеганографии — см. вкладку «Стего».</p>
+        </div>
+      </details>
+      <!-- Message input + Send -->
+      <div class="cm-encrypt-emoji-row">
+        <button class="cm-emoji-btn" id="btnEncryptEmoji" type="button" aria-label="Эмодзи" title="Вставить эмодзи">
+          <svg class="cm-icon cm-icon--sm"><use href="#icon-smile"/></svg>
+        </button>
+      </div>
+      <div class="cm-input-row">
+        <textarea
+          class="cm-textarea"
+          id="encryptInput"
+          placeholder="Введите сообщение для шифрования…"
+          rows="2"
+        ></textarea>
+        <!-- <button class="cm-btn cm-btn--send" id="btnEncryptSend" type="button" aria-label="Отправить"><svg class="cm-icon"><use href="#icon-send"/></svg></button> -->
+      </div>
+      <!-- Password + Encode/Decode toggle -->
+      <div class="cm-input-row">
+        <div class="cm-password-wrap">
+          <input
+            class="cm-input cm-input--password"
+            id="encryptPassword"
+            type="password"
+            placeholder="Пароль"
+            autocomplete="off"
+          >
+          <button class="cm-password-toggle" id="btnToggleEncryptPw" type="button" aria-label="Показать пароль"><svg class="cm-icon cm-icon--sm"><use href="#icon-eye"/></svg></button>
+        </div>
+        <div class="cm-direction-toggle" id="encryptDirection">
+          <button class="cm-direction-toggle__btn active" data-direction="encode" type="button">Шифровать</button><button class="cm-direction-toggle__btn" data-direction="decode" type="button">Дешифровать</button>
+        </div>
+        <button class="cm-btn cm-btn--secondary cm-btn--icon" id="btnEncryptCopy" type="button" title="Копировать"><svg class="cm-icon cm-icon--sm"><use href="#icon-copy"/></svg></button>
+      </div>
+      <!-- Encryption result preview -->
+      <div class="cm-encrypt-result-section" id="encryptResultSection" style="display:none">
+        <div class="cm-encrypt-preview-header">
+          <span class="cm-input-label">Результат</span>
+          <span class="cm-preview-indicator" style="font-size:11px;margin-left:6px;color:var(--cm-text-muted)">Предпросмотр</span>
+          <div class="cm-encrypt-preview-actions">
+            <button class="cm-btn cm-btn--secondary cm-btn--compact" id="btnEncryptResultCopy" type="button">
+              <svg class="cm-icon cm-icon--sm"><use href="#icon-copy"/></svg>
+            </button>
+            <button class="cm-btn cm-btn--primary cm-btn--compact" id="btnBridgeSend" type="button" style="display:none">
+              <svg class="cm-icon cm-icon--sm"><use href="#icon-send"/></svg>
+              <span>Отправить</span>
+            </button>
+          </div>
+        </div>
+        <div class="cm-encrypt-result" id="encryptResultPreview"></div>
+      </div>
+    </div>
+
+    <!-- ─── Steganography Encode Input ────────────────────────── -->
+    <div class="cm-input-panel" id="panelStegoEncode" data-category-panel="stego-encode">
+      <details class="cm-help-collapsible">
+        <summary class="cm-help-collapsible__summary">📖 Справка по стеганографии</summary>
+        <div class="cm-help-collapsible__body">
+          <p><b>Как работает стеганография:</b> Секретное сообщение шифруется и «вшивается» в текст-носитель. Кодирование и декодирование работают БЕЗ оригинала — только стего-текст и пароль.</p>
+          <p><b>Лингвистические каналы (авто-определяются):</b> синонимы, аббревиатуры, пунктуация, даты, ё/е, пробелы, телефоны, URL, email, ФИО, эмодзи и др.</p>
+          <p><b>Теговые каналы (вставляются через алиасы в текст):</b></p>
+          <ul>
+            <li><code>[steg-fio]</code> — российские ФИО (33 бит)</li>
+            <li><code>[steg-pc-proc]</code>, <code>[steg-pc-ram]</code>, <code>[steg-auto-engine]</code>, <code>[steg-gadget-phone]</code> — комплектующие, гаджеты и др.</li>
+            <li><code>[steg-recipe-universal]</code>, <code>[steg-recipe-meat]</code> — рецепты (117 бит/тег)</li>
+            <li><code>[steg-address]</code> — адреса РФ с аббревиатурами как доп. биты (52 бит/тег)</li>
+            <li><code>[stego-music]</code> — музыкальные треки, 8192×8192 комбинаций (26 бит/тег)</li>
+            <li><code>[steg-code-python]</code>, <code>[steg-code-typescript]</code>, <code>[steg-code-go]</code>, <code>[steg-code-rust]</code>, <code>[steg-code-css]</code> — полноценные файлы кода (256 бит/тег)</li>
+            <li><code>[steg-json]</code> — JSON конфиги с UUID — <b>128 бит/тег</b>, самый ёмкий!</li>
+            <li><code>[steg-movie]</code> — фильмы в кавычках, ~45000 названий (≤15 бит/вхождение)</li>
+            <li><code>[steg-videogame]</code> — видеоигры, ~800 названий (≤10 бит/вхождение)</li>
+            <li><code>[steg-dog]</code>, <code>[steg-cat]</code> — породы собак/кошек (≤9 бит/вхождение)</li>
+          </ul>
+          <p><b>Подсказка:</b> Введите `[steg-` в поле текста-носителя — автодополнение покажет все доступные алиасы.</p>
+          <p><b>Важно:</b> Не все сообщения можно зашифровать в любой текст. Ёмкость зависит от длины и содержания носителя. Используйте длинные тексты с алиасами для максимальной ёмкости.</p>
+        </div>
+      </details>
+      <div class="cm-stego-encode-layout">
+        <!-- Secret message -->
+        <div class="cm-field-group">
+          <label class="cm-input-label" for="secret-message">Секретное сообщение</label>
+          <textarea
+            class="cm-textarea"
+            id="secret-message"
+            placeholder="Секретное сообщение…"
+            rows="2"
+          ></textarea>
+          <div id="secret-chars-warning" class="cm-field-warning" style="display:none"></div>
+        </div>
+        <!-- Carrier text with overlay highlighting -->
+        <div class="cm-field-group">
+          <div class="cm-carrier-header">
+            <label class="cm-input-label" for="carrier-text">Текст-носитель</label>
+            <div class="cm-carrier-header__actions">
+              <button class="cm-emoji-btn" id="btnEmojiPicker" type="button" aria-label="Эмодзи" title="Вставить эмодзи">
+                <svg class="cm-icon cm-icon--sm"><use href="#icon-smile"/></svg>
+              </button>
+              <button class="cm-emoji-btn" id="btn-emoji-stego" type="button" title="Emojistego" aria-label="Emojistego">
+                <svg class="cm-icon cm-icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><circle cx="12" cy="16" r="1"/></svg>
+              </button>
+              <span class="cm-stego-capacity-badge" id="capacity-badge">0 бит</span>
+            </div>
+          </div>
+          <div class="cm-carrier-container" id="carrierContainer">
+            <textarea
+              class="cm-textarea cm-carrier-textarea"
+              id="carrier-text"
+              placeholder="Обычный текст для сокрытия…"
+              rows="4"
+            ></textarea>
+            <div class="cm-carrier-overlay" id="carrier-overlay" aria-hidden="true"></div>
+          </div>
+          <!-- Auto-detected channels -->
+          <div class="cm-stego-channels" id="stego-channels">
+            <!-- Channel badges will be inserted here by JS -->
+          </div>
+        </div>
+        <!-- Password + Encode button -->
+        <div class="cm-input-row">
+          <div class="cm-password-wrap">
+            <input
+              class="cm-input cm-input--password"
+              id="password-encode"
+              type="password"
+              placeholder="Пароль"
+              autocomplete="off"
+            >
+            <button class="cm-password-toggle" id="btnToggleStegoEncPw" type="button" aria-label="Показать пароль"><svg class="cm-icon cm-icon--sm"><use href="#icon-eye"/></svg></button>
+          </div>
+          <button class="cm-btn cm-btn--primary" id="btn-encode" type="button"><svg class="cm-icon cm-icon--sm"><use href="#icon-zap"/></svg> Кодировать</button>
+        </div>
+
+        <!-- Result preview -->
+        <div class="cm-stego-result-section">
+          <div class="cm-stego-preview-header">
+            <span class="cm-input-label">Результат</span>
+            <div class="cm-stego-preview-actions">
+              <button class="cm-btn cm-btn--secondary cm-btn--compact" id="btn-ls-toggle" type="button" title="Редактировать формы слов (временно отключить буквенное стего)" style="display:none">
+                <svg class="cm-icon cm-icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+              </button>
+              <button class="cm-btn cm-btn--secondary cm-btn--compact" id="btn-abbr-reset" type="button" title="Сбросить формы слов" style="display:none">
+                <svg class="cm-icon cm-icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+              </button>
+              <button class="cm-btn cm-btn--secondary cm-btn--compact" id="btn-copy" type="button"><svg class="cm-icon cm-icon--sm"><use href="#icon-copy"/></svg></button>
+            </div>
+          </div>
+          <div class="cm-stego-result" id="output-text"></div>
+          <!-- Abbreviation form selection panel (hidden — replaced by inline UI) -->
+          <div class="cm-abbr-forms-panel" id="abbr-forms-panel"></div>
+        </div>
+      </div>
+
+      <!-- Emojistego Popup (hidden by default) -->
+      <div class="cm-emoji-stego-popup" id="emojiStegoPopup" style="display:none">
+        <div class="cm-emoji-stego-popup__header">
+          <span><svg class="cm-icon cm-icon--sm"><use href="#icon-lock"/></svg> Emojistego — добавить стего-канал</span>
+          <button class="cm-emoji-stego-popup__close" id="btnCloseEmojiStego" type="button" aria-label="Закрыть"><svg class="cm-icon cm-icon--sm"><use href="#icon-x"/></svg></button>
+        </div>
+        <div class="cm-emoji-stego-popup__body">
+          <div id="emoji-stego-capacity" class="cm-emoji-stego-capacity"></div>
+          <label class="cm-input-label">Эмодзи-носитель</label>
+          <div class="cm-emoji-stego-picker-row">
+            <span class="cm-emoji-stego-preview" id="emoji-stego-preview">😊</span>
+            <button class="cm-btn cm-btn--secondary cm-btn--compact" id="btnPickStegoEmoji" type="button" title="Выбрать эмодзи"><svg class="cm-icon cm-icon--sm"><use href="#icon-smile"/></svg></button>
+          </div>
+          <input class="cm-input" id="emoji-stego-keyboard-input" type="text" placeholder="Или вставьте эмодзи с клавиатуры" maxlength="10" autocomplete="off" style="margin-top:4px">
+          <button class="cm-btn cm-btn--primary cm-btn--full" id="btnCreateStegoEmoji" type="button"><svg class="cm-icon cm-icon--sm"><use href="#icon-zap"/></svg> Вставить стего-эмодзи в носитель</button>
+          <div style="font-size:11px;color:var(--cm-text-secondary,#9ca3af);margin-top:6px;line-height:1.4">
+            Стего-эмодзи — это дополнительный канал ёмкостью 256 байт.<br>
+            Кодировщик автоматически распределит данные между всеми каналами.<br>
+            Можно вставить несколько эмодзи — каждый несёт свою часть.
+          </div>
+        </div>
+      </div>
+    </div><!-- /panelStegoEncode -->
+
+    <!-- ─── Steganography Decode Input ────────────────────────── -->
+    <div class="cm-input-panel" id="panelStegoDecode" data-category-panel="stego-decode">
+      <div class="cm-input-row--full">
+        <label class="cm-input-label" for="stego-text">Стего-текст</label>
+        <textarea
+          class="cm-textarea cm-textarea--tall"
+          id="stego-text"
+          placeholder="Вставьте текст со скрытым сообщением…"
+          rows="3"
+        ></textarea>
+      </div>
+      <div class="cm-input-row">
+        <div class="cm-password-wrap">
+          <input
+            class="cm-input cm-input--password"
+            id="password-decode"
+            type="password"
+            placeholder="Пароль"
+            autocomplete="off"
+          >
+          <button class="cm-password-toggle" id="btnToggleStegoDecPw" type="button" aria-label="Показать пароль"><svg class="cm-icon cm-icon--sm"><use href="#icon-eye"/></svg></button>
+        </div>
+        <div style="flex:1"></div>
+        <button class="cm-btn cm-btn--primary" id="btn-decode" type="button"><svg class="cm-icon cm-icon--sm"><use href="#icon-unlock"/></svg> Декодировать</button>
+      </div>
+      <div class="cm-result-preview" id="decoded-message"></div>
+    </div>
+
+    <!-- ─── Steganography Recovery Input ──────────────────────── -->
+    <div class="cm-input-panel" id="panelStegoRecovery" data-category-panel="stego-recovery">
+      <div class="cm-input-row--full">
+        <label class="cm-input-label" for="recovery-text">Повреждённый стего-текст</label>
+        <textarea
+          class="cm-textarea cm-textarea--tall"
+          id="recovery-text"
+          placeholder="Вставьте повреждённый текст для восстановления…"
+          rows="3"
+        ></textarea>
+      </div>
+      <div class="cm-input-row">
+        <div class="cm-password-wrap">
+          <input
+            class="cm-input cm-input--password"
+            id="password-recovery"
+            type="password"
+            placeholder="Пароль"
+            autocomplete="off"
+          >
+          <button class="cm-password-toggle" id="btnToggleStegoRecPw" type="button" aria-label="Показать пароль"><svg class="cm-icon cm-icon--sm"><use href="#icon-eye"/></svg></button>
+        </div>
+        <div style="flex:1"></div>
+        <button class="cm-btn cm-btn--primary" id="btn-recovery" type="button"><svg class="cm-icon cm-icon--sm"><use href="#icon-wrench"/></svg> Восстановить</button>
+      </div>
+      <div class="cm-result-preview" id="recovery-result"></div>
+    </div>
+
+    <!-- ─── Extreme Stego Panel ─────────────────────────────────── -->
+    <div class="cm-input-panel" id="panelStegoExtreme" data-category-panel="stego-extreme">
+      <details class="cm-help-collapsible">
+        <summary class="cm-help-collapsible__summary">📖 Справка по экстремальным методам</summary>
+        <div class="cm-help-collapsible__body">
+          <p><b>Экстремальные методы</b> кодируют данные напрямую в текст, не используя лингвистические каналы. Каждый метод работает независимо и может быть включён/выключен.</p>
+          <ul>
+            <li><b>Zero-width символы</b> — невидимые символы между буквами. Самый ёмкий метод (~2 бит/символ).</li>
+            <li><b>Пробелы</b> — замена обычных пробелов на неразрывные. 1 бит/пробел.</li>
+            <li><b>Регистр</b> — чередование верхнего/нижнего регистра. 1 бит/буква.</li>
+            <li><b>Кириллица → Латиница</b> — замена похожих букв (А→A, О→O и т.д.). 1 бит/позиция.</li>
+          </ul>
+          <p><b>Автообнаружение:</b> При декодировании методы определяются автоматически. Пароль нужен всегда.</p>
+          <p><b>⚠ Предупреждение:</b> Все методы заметны при внимательном просмотре текста.</p>
+        </div>
+      </details>
+
+      <div class="cm-extreme-stego-layout">
+        <!-- Direction toggle -->
+        <div class="cm-extreme-direction-row">
+          <div class="cm-direction-toggle" id="extremeDirection">
+            <button class="cm-direction-toggle__btn active" data-direction="encode" type="button">Кодировать</button>
+            <button class="cm-direction-toggle__btn" data-direction="decode" type="button">Декодировать</button>
+          </div>
+        </div>
+
+        <!-- Encode mode -->
+        <div class="cm-extreme-encode-section" id="extremeEncodeSection">
+          <!-- Secret message -->
+          <div class="cm-field-group">
+            <label class="cm-input-label" for="extreme-secret">Секретное сообщение</label>
+            <textarea class="cm-textarea" id="extreme-secret" placeholder="Секретное сообщение…" rows="2"></textarea>
+          </div>
+
+          <!-- Carrier text -->
+          <div class="cm-field-group">
+            <label class="cm-input-label" for="extreme-carrier">Текст-носитель</label>
+            <textarea class="cm-textarea" id="extreme-carrier" placeholder="Текст для сокрытия сообщения…" rows="3"></textarea>
+          </div>
+
+          <!-- Method checkboxes -->
+          <div class="cm-extreme-methods">
+            <div class="cm-checkbox-row">
+              <input type="checkbox" class="extreme-method-toggle" id="extremeMethodZW" checked>
+              <label for="extremeMethodZW">
+                Zero-width символы
+                <small id="extremeCapZW">— бит</small>
+              </label>
+            </div>
+            <div class="cm-checkbox-row">
+              <input type="checkbox" class="extreme-method-toggle" id="extremeMethodSpaces" checked>
+              <label for="extremeMethodSpaces">
+                Пробелы / Неразрывные пробелы
+                <small id="extremeCapSpaces">— бит</small>
+              </label>
+            </div>
+            <div class="cm-checkbox-row">
+              <input type="checkbox" class="extreme-method-toggle" id="extremeMethodCase">
+              <label for="extremeMethodCase">
+                Регистр букв
+                <small id="extremeCapCase">— бит</small>
+              </label>
+            </div>
+            <div class="cm-checkbox-row">
+              <input type="checkbox" class="extreme-method-toggle" id="extremeMethodCyrLat">
+              <label for="extremeMethodCyrLat">
+                Кириллица → Латиница
+                <small id="extremeCapCyrLat">— бит</small>
+              </label>
+            </div>
+          </div>
+
+          <!-- Total capacity -->
+          <div class="cm-extreme-capacity-row">
+            <span class="cm-stego-capacity-badge" id="extreme-capacity">—</span>
+          </div>
+        </div>
+
+        <!-- Decode mode -->
+        <div class="cm-extreme-decode-section" id="extremeDecodeSection" style="display:none">
+          <div class="cm-input-row--full">
+            <label class="cm-input-label" for="extreme-stego-text">Стего-текст</label>
+            <textarea class="cm-textarea cm-textarea--tall" id="extreme-stego-text" placeholder="Вставьте текст со скрытым сообщением…" rows="4"></textarea>
+          </div>
+          <div class="cm-extreme-detected-methods" id="extremeDetectedMethods" style="display:none">
+            <span class="cm-input-label">Обнаруженные методы:</span>
+            <span id="extremeDetectedList"></span>
+          </div>
+        </div>
+
+        <!-- Password + Action button (shared) -->
+        <div class="cm-input-row">
+          <div class="cm-password-wrap">
+            <input
+              class="cm-input cm-input--password"
+              id="extreme-password"
+              type="password"
+              placeholder="Пароль"
+              autocomplete="off"
+            >
+            <button class="cm-password-toggle" id="btnToggleExtremePw" type="button" aria-label="Показать пароль"><svg class="cm-icon cm-icon--sm"><use href="#icon-eye"/></svg></button>
+          </div>
+          <div style="flex:1"></div>
+          <button class="cm-btn cm-btn--primary" id="btn-extreme-action" type="button"><svg class="cm-icon cm-icon--sm"><use href="#icon-zap"/></svg> Кодировать</button>
+        </div>
+
+        <!-- Result -->
+        <div class="cm-stego-result-section">
+          <div class="cm-stego-preview-header">
+            <span class="cm-input-label">Результат</span>
+            <div class="cm-stego-preview-actions">
+              <button class="cm-btn cm-btn--secondary cm-btn--compact" id="btn-extreme-to-decode" type="button" title="Перенести в декодирование"><svg class="cm-icon cm-icon--sm"><use href="#icon-send"/></svg></button>
+              <button class="cm-btn cm-btn--secondary cm-btn--compact" id="btn-extreme-copy" type="button"><svg class="cm-icon cm-icon--sm"><use href="#icon-copy"/></svg></button>
+            </div>
+          </div>
+          <div class="cm-stego-result" id="extreme-output"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── Image Steganography Panel ─────────────────────────── -->
+    <div class="cm-input-panel" id="panelImageStego" data-category-panel="img-encode">
+      <div class="cm-imgstego-layout">
+        
+        <!-- Direction toggle -->
+        <div class="cm-imgstego-direction-row">
+          <div class="cm-direction-toggle" id="imgDirection">
+            <button class="cm-direction-toggle__btn active" data-direction="encode" type="button">Кодировать</button>
+            <button class="cm-direction-toggle__btn" data-direction="decode" type="button">Декодировать</button>
+          </div>
+        </div>
+
+        <!-- Encode section -->
+        <div class="cm-imgstego-encode-section" id="imgEncodeSection">
+          <!-- Algorithm selector -->
+          <div class="cm-field-group">
+            <label class="cm-input-label" for="imgAlgorithm">Алгоритм</label>
+            <select class="cm-input cm-imgstego-select" id="imgAlgorithm">
+              <option value="dct-qim" selected>DCT-QIM — Квантовая индексная модуляция (устойчив к JPEG)</option>
+              <option value="dsss">DSSS — Рассеивание спектра (пароль обязателен)</option>
+              <option value="text-overlay">Text Overlay — Текст поверх изображения</option>
+              <option value="cryptostego-similarity">CryptoStego — Визуальная схожесть</option>
+              <option value="cryptostego-robustness">CryptoStego — Устойчивый</option>
+              <option value="passlok-f5">PassLok — F5 алгоритм</option>
+              <option value="spectra-steg">SpectraSteg — Частотный (DCT, крайне устойчив)</option>
+              <option value="image-scrambler">ImageScrambler — Шифрование изображения</option>
+            </select>
+            <div class="cm-imgstego-algo-info" id="imgAlgoInfo">DCT-QIM: стеганография в DCT-коэффициентах с квантованием. Устойчив к JPEG-перекодированию. Рекомендуется.</div>
+          </div>
+
+          <!-- SpectraSteg: robustness slider -->
+          <div class="cm-field-group" id="imgSpectraStegOptions" style="display:none">
+            <label class="cm-input-label">Устойчивость SpectraSteg <span id="imgSpectraAlphaVal" style="float:right;font-weight:400;color:var(--cm-text-muted)">50</span></label>
+            <input type="range" id="imgSpectraAlpha" min="5" max="100" value="50" class="cm-imgstego-range">
+            <div class="cm-imgstego-password-hint">Выше — переживает сильное сжатие, но может быть заметнее визуальный шум.</div>
+          </div>
+
+          <!-- DCT-QIM options -->
+          <div class="cm-field-group" id="imgDctQimOptions" style="display:none">
+            <label class="cm-input-label">Устойчивость DCT-QIM</label>
+            <select class="cm-input cm-imgstego-select" id="imgDctQimRobustness">
+              <option value="low">Низкая (больше ёмкость)</option>
+              <option value="medium" selected>Средняя (баланс)</option>
+              <option value="high">Высокая (переживает сильное сжатие)</option>
+            </select>
+            <div class="cm-imgstego-password-hint" style="margin-top:4px">Выше устойчивость — меньше ёмкость, но переживает JPEG-перекодирование в соцсетях.</div>
+          </div>
+
+          <!-- DSSS options -->
+          <div class="cm-field-group" id="imgDsssOptions" style="display:none">
+            <label class="cm-input-label">Фактор рассеивания DSSS <span id="imgDsssFactorVal" style="float:right;font-weight:400;color:var(--cm-text-muted)">16x</span></label>
+            <select class="cm-input cm-imgstego-select" id="imgDsssFactor">
+              <option value="8">8x (больше ёмкость)</option>
+              <option value="16" selected>16x (баланс)</option>
+              <option value="32">32x (более устойчив)</option>
+              <option value="64">64x (максимальная устойчивость)</option>
+            </select>
+            <div class="cm-imgstego-password-hint" style="margin-top:4px">Пароль ОБЯЗАТЕЛЕН. Выше фактор — больше избыточность и устойчивость к повреждениям, но меньше ёмкость.</div>
+          </div>
+
+          <!-- TextOverlay: hidden state inputs + editor button -->
+          <div id="imgTextOverlayOptions" style="display:none">
+            <input type="hidden" id="imgTextOverlayFont" value="Arial, sans-serif">
+            <input type="hidden" id="imgTextOverlayColor" value="#ffffff">
+            <input type="hidden" id="imgTextOverlayColorText" value="#ffffff">
+            <input type="hidden" id="imgTextOverlaySize" value="24">
+            <input type="hidden" id="imgTextOverlayOpacity" value="15">
+            <input type="hidden" id="imgTextOverlayPosition" value="tile">
+            <input type="hidden" id="imgTextOverlayRotation" value="0">
+            <input type="hidden" id="imgTextOverlayLineSpacing" value="1.4">
+            <input type="hidden" id="imgTextOverlayPosX" value="10">
+            <input type="hidden" id="imgTextOverlayPosY" value="10">
+          </div>
+          <div id="imgTextOverlayEditorArea" style="display:none">
+            <div class="cm-imgstego-password-hint" style="margin-bottom:8px">Настройте текст, шрифт, позицию и искажения в визуальном редакторе. Текст внедряется поверх изображения.</div>
+            <button class="cm-btn cm-btn--primary cm-btn--full" id="btnOpenTextOverlayEditor" type="button">
+              <svg class="cm-icon cm-icon--sm"><use href="#icon-sliders"/></svg> Открыть визуальный редактор
+            </button>
+          </div>
+
+          <!-- ImageScrambler: normalization toggle -->
+          <div class="cm-field-group" id="imgScramblerOptions" style="display:none">
+            <label class="cm-input-label" style="display:flex;align-items:center;gap:8px;cursor:pointer">
+              <input type="checkbox" id="imgScramblerSafeMode" checked style="width:16px;height:16px;accent-color:var(--cm-accent)">
+              Нормализация до 1024px
+            </label>
+            <div class="cm-imgstego-password-hint" style="color:var(--cm-danger);display:none" id="imgScramblerWarn">Отключение нормализации может привести к потере данных при агрессивном сжатии больших изображений.</div>
+          </div>
+
+          <!-- Background Generator (for text-overlay when no carrier image) -->
+          <div class="cm-field-group" id="imgBgGeneratorSection" style="display:none">
+            <details class="cm-help-collapsible" open>
+              <summary class="cm-help-collapsible__summary">🎨 Генератор подложки (если нет своего изображения)</summary>
+              <div class="cm-help-collapsible__body">
+                <div class="cm-imgstego-bggen-grid">
+                  <!-- Bubble presets -->
+                  <button class="cm-imgstego-bggen-btn cm-imgstego-bggen-btn--telegram" data-bggen="bubble-telegram" type="button">
+                    <span class="cm-imgstego-bggen-dot" style="background:#2AABEE"></span>
+                    Telegram
+                  </button>
+                  <button class="cm-imgstego-bggen-btn cm-imgstego-bggen-btn--whatsapp" data-bggen="bubble-whatsapp" type="button">
+                    <span class="cm-imgstego-bggen-dot" style="background:#25D366"></span>
+                    WhatsApp
+                  </button>
+                  <button class="cm-imgstego-bggen-btn cm-imgstego-bggen-btn--imessage" data-bggen="bubble-imessage" type="button">
+                    <span class="cm-imgstego-bggen-dot" style="background:#007AFF"></span>
+                    iMessage
+                  </button>
+                  <button class="cm-imgstego-bggen-btn cm-imgstego-bggen-btn--discord" data-bggen="bubble-discord" type="button">
+                    <span class="cm-imgstego-bggen-dot" style="background:#5865F2"></span>
+                    Discord
+                  </button>
+                  <button class="cm-imgstego-bggen-btn cm-imgstego-bggen-btn--sms" data-bggen="bubble-sms" type="button">
+                    <span class="cm-imgstego-bggen-dot" style="background:#4CAF50"></span>
+                    SMS
+                  </button>
+                  <!-- Noise generators -->
+                  <button class="cm-imgstego-bggen-btn cm-imgstego-bggen-btn--noise" data-bggen="noise-gaussian" type="button">
+                    <svg class="cm-icon cm-icon--sm"><use href="#icon-sliders"/></svg>
+                    Гауссов шум
+                  </button>
+                  <button class="cm-imgstego-bggen-btn cm-imgstego-bggen-btn--noise" data-bggen="noise-uniform" type="button">
+                    <svg class="cm-icon cm-icon--sm"><use href="#icon-sliders"/></svg>
+                    Равномерный шум
+                  </button>
+                  <button class="cm-imgstego-bggen-btn cm-imgstego-bggen-btn--noise" data-bggen="noise-salt" type="button">
+                    <svg class="cm-icon cm-icon--sm"><use href="#icon-sliders"/></svg>
+                    Соль и перец
+                  </button>
+                </div>
+                <div style="font-size:11px;color:var(--cm-text-muted);margin-top:6px;line-height:1.4">
+                  Генерирует фоновое изображение 800×600 px. Текст будет наложен через визуальный редактор.
+                </div>
+              </div>
+            </details>
+          </div>
+
+          <!-- Generate Random quick button -->
+          <div class="cm-field-group" id="imgRandomGenSection" style="display:none">
+            <div class="cm-imgstego-random-row">
+              <button class="cm-btn cm-btn--secondary cm-btn--full" id="imgRandomGenBtn" type="button">
+                <svg class="cm-icon cm-icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/><line x1="12" y1="10" x2="12" y2="20"/></svg>
+                Сгенерировать случайно
+              </button>
+              <button class="cm-btn cm-btn--primary cm-btn--full" id="imgQuickApiBtn" type="button" title="Быстрое API: получить готовое OCR-устойчивое изображение">
+                <svg class="cm-icon cm-icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                Быстрое изображение
+              </button>
+            </div>
+            <div style="font-size:11px;color:var(--cm-text-muted);margin-top:4px;line-height:1.4">
+              <b>Случайно:</b> искажения + кодирование / пресет + деформация.
+              <b>Быстрое:</b> готовое OCR-устойчивое изображение по тексту (доступно через API: <code>POST /api/ocr-image</code>).
+            </div>
+          </div>
+
+          <!-- Image upload area -->
+          <div class="cm-field-group">
+            <div class="cm-imgstego-upload-header">
+              <label class="cm-input-label">Изображение</label>
+              <div class="cm-imgstego-upload-actions">
+                <button class="cm-btn cm-btn--secondary cm-btn--compact" id="imgSearchBtn" type="button" title="Найти изображение">
+                  <svg class="cm-icon cm-icon--sm"><use href="#icon-search"/></svg> Найти
+                </button>
+              </div>
+            </div>
+            <div class="cm-imgstego-dropzone" id="imgDropzone">
+              <input type="file" id="imgFileInput" accept="image/png,image/jpeg,image/jpg,image/gif,image/webp" style="display:none">
+              <div class="cm-imgstego-dropzone-content">
+                <svg class="cm-icon cm-imgstego-dropzone-icon"><use href="#icon-upload"/></svg>
+                <div class="cm-imgstego-dropzone-text">Перетащите изображение сюда</div>
+                <div class="cm-imgstego-dropzone-subtext">или нажмите для выбора файла</div>
+              </div>
+              <canvas id="imgCanvas" class="cm-imgstego-canvas" style="display:none"></canvas>
+              <div class="cm-imgstego-img-info" id="imgInfo" style="display:none"></div>
+            </div>
+          </div>
+
+          <!-- Secret input -->
+          <div class="cm-field-group">
+            <div class="cm-imgstego-secret-header">
+              <label class="cm-input-label" for="imgSecret">Секретное сообщение</label>
+              <div class="cm-imgstego-secret-actions">
+                <span class="cm-imgstego-capacity-badge" id="imgCapacity">—</span>
+                <button class="cm-btn cm-btn--secondary cm-btn--compact" id="imgFileAttachBtn" type="button" title="Встроить файл">
+                  <svg class="cm-icon cm-icon--sm"><use href="#icon-paperclip"/></svg>
+                </button>
+              </div>
+            </div>
+            <textarea class="cm-textarea" id="imgSecret" placeholder="Секретное сообщение…" rows="2"></textarea>
+            <input type="file" id="imgFileAttach" style="display:none">
+            <div class="cm-imgstego-file-info" id="imgFileInfo" style="display:none"></div>
+          </div>
+
+          <!-- Password -->
+          <div class="cm-input-row">
+            <div class="cm-password-wrap">
+              <input class="cm-input cm-input--password" id="imgPassword" type="password" placeholder="Пароль (необязательно)" autocomplete="off">
+              <button class="cm-password-toggle" id="btnToggleImgPw" type="button" aria-label="Показать пароль">
+                <svg class="cm-icon cm-icon--sm"><use href="#icon-eye"/></svg>
+              </button>
+            </div>
+          </div>
+          <div class="cm-imgstego-password-hint">Пустой пароль — без шифрования. Для CryptoStego пароль встроен. Для PassLok включает RC4 + scrypt.</div>
+
+          <!-- Action button -->
+          <button class="cm-btn cm-btn--primary cm-btn--full" id="imgEncodeBtn" type="button" disabled>
+            <svg class="cm-icon cm-icon--sm"><use href="#icon-zap"/></svg> Кодировать
+          </button>
+        </div>
+
+        <!-- Decode section -->
+        <div class="cm-imgstego-decode-section" id="imgDecodeSection" style="display:none">
+          <!-- Algorithm selector for decode -->
+          <div class="cm-field-group">
+            <label class="cm-input-label" for="imgDecodeAlgorithm">Алгоритм</label>
+            <select class="cm-input cm-imgstego-select" id="imgDecodeAlgorithm">
+              <option value="auto" selected>Автоопределение</option>
+              <option value="dct-qim">DCT-QIM — Квантовая модуляция</option>
+              <option value="dsss">DSSS — Рассеивание спектра</option>
+              <option value="cryptostego">CryptoStego</option>
+              <option value="passlok">PassLok</option>
+              <option value="spectra-steg">SpectraSteg — Частотный</option>
+              <option value="image-scrambler">ImageScrambler — Шифрование изображения</option>
+            </select>
+          </div>
+
+          <!-- Image upload for decode -->
+          <div class="cm-field-group">
+            <label class="cm-input-label">Стего-изображение</label>
+            <div class="cm-imgstego-dropzone" id="imgDecodeDropzone">
+              <input type="file" id="imgDecodeFileInput" accept="image/png,image/jpeg,image/jpg,image/gif,image/webp" style="display:none">
+              <div class="cm-imgstego-dropzone-content">
+                <svg class="cm-icon cm-imgstego-dropzone-icon"><use href="#icon-upload"/></svg>
+                <div class="cm-imgstego-dropzone-text">Перетащите стего-изображение</div>
+                <div class="cm-imgstego-dropzone-subtext">или нажмите для выбора файла</div>
+              </div>
+              <canvas id="imgDecodeCanvas" class="cm-imgstego-canvas" style="display:none"></canvas>
+            </div>
+          </div>
+
+          <!-- Password for decode -->
+          <div class="cm-input-row">
+            <div class="cm-password-wrap">
+              <input class="cm-input cm-input--password" id="imgDecodePassword" type="password" placeholder="Пароль" autocomplete="off">
+              <button class="cm-password-toggle" id="btnToggleImgDecPw" type="button" aria-label="Показать пароль">
+                <svg class="cm-icon cm-icon--sm"><use href="#icon-eye"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Decode button -->
+          <button class="cm-btn cm-btn--primary cm-btn--full" id="imgDecodeBtn" type="button" disabled>
+            <svg class="cm-icon cm-icon--sm"><use href="#icon-unlock"/></svg> Декодировать
+          </button>
+          <!-- TextOverlay reveal button (only for text-overlay mode) -->
+          <button class="cm-btn cm-btn--secondary cm-btn--full" id="imgTextOverlayRevealBtn" type="button" style="display:none">
+            <svg class="cm-icon cm-icon--sm"><use href="#icon-eye"/></svg> Усилить видимость текста
+          </button>
+
+          <!-- Decoded result -->
+          <div class="cm-imgstego-decoded-result" id="imgDecodedResult" style="display:none">
+            <label class="cm-input-label">Расшифрованное сообщение</label>
+            <div class="cm-imgstego-decoded-text" id="imgDecodedText"></div>
+            <button class="cm-btn cm-btn--secondary cm-btn--compact" id="imgDecodedCopy" type="button">
+              <svg class="cm-icon cm-icon--sm"><use href="#icon-copy"/></svg> Копировать
+            </button>
+          </div>
+
+          <!-- Decoded file result -->
+          <div class="cm-imgstego-decoded-file" id="imgDecodedFile" style="display:none">
+            <label class="cm-input-label">Встроенный файл</label>
+            <div class="cm-imgstego-file-result" id="imgDecodedFileInfo"></div>
+            <button class="cm-btn cm-btn--secondary cm-btn--compact" id="imgDecodedFileSave" type="button">
+              <svg class="cm-icon cm-icon--sm"><use href="#icon-download"/></svg> Скачать
+            </button>
+          </div>
+        </div>
+
+        <!-- Result section -->
+        <div class="cm-imgstego-result-section" id="imgResultSection" style="display:none">
+          <div class="cm-imgstego-result-header">
+            <span class="cm-input-label">Результат</span>
+            <div class="cm-imgstego-result-actions">
+              <span class="cm-imgstego-roundtrip-badge" id="imgRoundtripBadge" style="display:none"></span>
+              <button class="cm-btn cm-btn--secondary cm-btn--compact" id="imgResultDownload" type="button" title="Скачать PNG">
+                <svg class="cm-icon cm-icon--sm"><use href="#icon-download"/></svg> PNG
+              </button>
+              <button class="cm-btn cm-btn--secondary cm-btn--compact" id="imgResultCopy" type="button" title="Копировать">
+                <svg class="cm-icon cm-icon--sm"><use href="#icon-copy"/></svg>
+              </button>
+            </div>
+          </div>
+          <div class="cm-imgstego-result-images">
+            <div class="cm-imgstego-result-original" id="imgResultOriginal" style="display:none">
+              <span class="cm-imgstego-result-label">Оригинал</span>
+              <canvas id="imgResultOriginalCanvas"></canvas>
+            </div>
+            <div class="cm-imgstego-result-stego">
+              <span class="cm-imgstego-result-label">Стего</span>
+              <canvas id="imgResultStegoCanvas"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stress-test section -->
+        <details class="cm-help-collapsible">
+          <summary class="cm-help-collapsible__summary">Стресс-тестирование</summary>
+          <div class="cm-imgstego-stress">
+            <p class="cm-imgstego-stress-desc">Проверьте устойчивость стего-изображения к различным преобразованиям. <span class="cm-imgstego-stress-note">DCT/F5 — устойчив к JPEG-перекодированию. LSB — только для PNG без сжатия.</span></p>
+            <div class="cm-imgstego-stress-grid">
+              <button class="cm-btn cm-btn--secondary cm-btn--compact" data-stress="run-all" type="button" style="grid-column:1/-1;background:var(--cm-accent);color:#fff;font-weight:600">Запустить все тесты</button>
+              <button class="cm-btn cm-btn--secondary cm-btn--compact" data-stress="jpeg-95" type="button">JPEG 95%</button>
+              <button class="cm-btn cm-btn--secondary cm-btn--compact" data-stress="jpeg-90" type="button">JPEG 90%</button>
+              <button class="cm-btn cm-btn--secondary cm-btn--compact" data-stress="jpeg-75" type="button">JPEG 75%</button>
+              <button class="cm-btn cm-btn--secondary cm-btn--compact" data-stress="jpeg-50" type="button">JPEG 50%</button>
+              <button class="cm-btn cm-btn--secondary cm-btn--compact" data-stress="resize-50" type="button">Рескейл 50%</button>
+              <button class="cm-btn cm-btn--secondary cm-btn--compact" data-stress="resize-75" type="button">Рескейл 75%</button>
+              <button class="cm-btn cm-btn--secondary cm-btn--compact" data-stress="png-recompress" type="button">PNG рекомпрессия</button>
+              <button class="cm-btn cm-btn--secondary cm-btn--compact" data-stress="crop-10" type="button">Обрезка 10%</button>
+            </div>
+            <div class="cm-imgstego-stress-results" id="imgStressResults"></div>
+          </div>
+        </details>
+
+        <!-- Hidden canvas for CryptoStego operations -->
+        <canvas id="imgHiddenCanvas" style="display:none"></canvas>
+
+        <!-- Image Search Modal (URL-only, no iframe due to CORS) -->
+        <div class="cm-imgstego-search-backdrop" id="imgSearchBackdrop"></div>
+        <div class="cm-imgstego-search-modal" id="imgSearchPopup" style="display:none">
+          <div class="cm-imgstego-search-modal__header">
+            <span class="cm-imgstego-search-modal__title">
+              <svg class="cm-icon cm-icon--sm"><use href="#icon-link"/></svg> Загрузить по URL
+            </span>
+            <button class="cm-imgstego-search-modal__close" id="imgSearchPopupClose" type="button" aria-label="Закрыть">
+              <svg class="cm-icon cm-icon--sm"><use href="#icon-x"/></svg>
+            </button>
+          </div>
+          <div class="cm-imgstego-search-modal__body">
+            <div class="cm-imgstego-search-modal__url-section">
+              <label class="cm-input-label">Прямая ссылка на изображение</label>
+              <div class="cm-imgstego-search-modal__url-row">
+                <input class="cm-input cm-imgstego-search-modal__url-input" id="imgSearchUrlInput" type="url" placeholder="https://example.com/image.jpg" autocomplete="off">
+                <button class="cm-btn cm-btn--primary" id="imgSearchUrlLoad" type="button">
+                  <svg class="cm-icon cm-icon--sm"><use href="#icon-upload"/></svg> Загрузить
+                </button>
+              </div>
+              <div class="cm-imgstego-search-modal__help">
+                Вставьте прямую ссылку на изображение (PNG, JPG, WebP). Изображение будет загружено и вставлено в стеганограф.
+              </div>
+              <div class="cm-imgstego-search-modal__divider">
+                <span>или</span>
+              </div>
+              <div class="cm-imgstego-search-modal__api-section">
+                <label class="cm-input-label">Загрузка из кода (API)</label>
+                <div class="cm-imgstego-search-modal__api-code">
+                  <code>Stegonator.load_image(dataUrl)</code>
+                </div>
+                <div class="cm-imgstego-search-modal__help">
+                  Можно загрузить изображение программно через WebView/JSI, передав data:image/png;base64,... или data:image/jpeg;base64,...
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div><!-- /panelImageStego -->
+
+    <!-- ─── Markov Text Stego Panel ──────────────────────────── -->
+    <div class="cm-input-panel" id="panelMarkovStego" data-category-panel="markov-encode">
+      <details class="cm-help-collapsible">
+        <summary class="cm-help-collapsible__summary">📖 Справка по Марков тексту</summary>
+        <div class="cm-help-collapsible__body">
+          <p><b>Марков текст-стего</b> — генерирует текст на основе цепей Маркова (n-грамм), встраивая секретное сообщение в выбор слов. Результат выглядит как естественный текст.</p>
+          <p><b>Корпус</b> — набор текстов (например, переписки), из которого строится n-граммная модель. Чем больше корпус, тем естественнее результат. Загружается как .zip архив с .txt файлами.</p>
+          <p><b>Кодирование:</b> секретное сообщение → стего-текст. <b>Декодирование:</b> стего-текст → секретное сообщение (нужен тот же корпус).</p>
+        </div>
+      </details>
+      <div id="markovEncodeSection">
+        <div class="cm-field-group">
+          <div class="cm-carrier-header">
+            <label class="cm-input-label">Корпус</label>
+            <div class="cm-carrier-header__actions">
+              <span class="cm-stego-capacity-badge" id="markovCorpusInfo">Не загружен</span>
+            </div>
+          </div>
+          <div class="cm-input-row">
+            <select class="cm-input" id="markovCorpusSelect" style="flex:1">
+              <option value="">— загрузите корпус —</option>
+            </select>
+            <button class="cm-btn cm-btn--secondary cm-btn--compact" id="markovLoadCorpusBtn" type="button" title="Загрузить .zip или .json">
+              <svg class="cm-icon cm-icon--sm"><use href="#icon-upload"/></svg>
+            </button>
+            <button class="cm-btn cm-btn--secondary cm-btn--compact" id="markovUnloadCorpusBtn" type="button" title="Выгрузить" style="display:none">
+              <svg class="cm-icon cm-icon--sm"><use href="#icon-trash"/></svg>
+            </button>
+          </div>
+          <div class="cm-input-row" style="margin-top:6px">
+            <span class="cm-input-label" style="white-space:nowrap;font-size:12px;color:var(--cm-text-secondary)">N-граммы:</span>
+            <select class="cm-input" id="markovNGramOrder" style="max-width:80px">
+              <option value="2">2</option>
+              <option value="3" selected>3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+            </select>
+          </div>
+          <div id="markovEncodeProgress" style="display:none;margin-top:6px">
+            <div class="cm-loading__progress">
+              <div class="cm-loading__progress-bar" id="markovEncodeProgressBar" style="width:0%"></div>
+            </div>
+            <span id="markovEncodeProgressText" style="font-size:11px;color:var(--cm-text-muted)">...</span>
+          </div>
+        </div>
+        <div class="cm-field-group">
+          <label class="cm-input-label" for="markovSecretInput">Секретное сообщение</label>
+          <textarea class="cm-textarea" id="markovSecretInput" placeholder="Секретное сообщение для встраивания…" rows="2"></textarea>
+        </div>
+        <div class="cm-input-row">
+          <div style="flex:1"></div>
+          <button class="cm-btn cm-btn--primary" id="markovEncodeBtn" type="button">
+            <svg class="cm-icon cm-icon--sm"><use href="#icon-zap"/></svg> Кодировать
+          </button>
+        </div>
+        <div class="cm-stego-result-section">
+          <div class="cm-stego-preview-header">
+            <span class="cm-input-label">Стего-текст</span>
+            <div class="cm-stego-preview-actions">
+              <button class="cm-btn cm-btn--secondary cm-btn--compact" id="markovCopyResult" type="button" title="Копировать">
+                <svg class="cm-icon cm-icon--sm"><use href="#icon-copy"/></svg>
+              </button>
+            </div>
+          </div>
+          <textarea class="cm-textarea cm-textarea--tall" id="markovEncodeResult" readonly placeholder="Здесь появится сгенерированный текст…" rows="4"></textarea>
+        </div>
+      </div>
+      <div id="markovDecodeSection" style="display:none">
+        <div class="cm-field-group">
+          <label class="cm-input-label">Корпус для декодирования</label>
+          <select class="cm-input" id="markovDecodeCorpusSelect" style="width:100%">
+            <option value="">— загрузите корпус —</option>
+          </select>
+          <div id="markovDecodeProgress" style="display:none;margin-top:6px">
+            <span id="markovDecodeProgressText" style="font-size:11px;color:var(--cm-text-muted)">Декодирование...</span>
+          </div>
+        </div>
+        <div class="cm-field-group">
+          <label class="cm-input-label" for="markovDecodeInput">Стего-текст</label>
+          <textarea class="cm-textarea cm-textarea--tall" id="markovDecodeInput" placeholder="Вставьте стего-текст…" rows="4"></textarea>
+        </div>
+        <div class="cm-input-row">
+          <div style="flex:1"></div>
+          <button class="cm-btn cm-btn--primary" id="markovDecodeBtn" type="button">
+            <svg class="cm-icon cm-icon--sm"><use href="#icon-unlock"/></svg> Декодировать
+          </button>
+        </div>
+        <div class="cm-stego-result-section">
+          <div class="cm-stego-preview-header">
+            <span class="cm-input-label">Декодированное сообщение</span>
+            <div class="cm-stego-preview-actions">
+              <button class="cm-btn cm-btn--secondary cm-btn--compact" id="markovCopyDecodeResult" type="button" title="Копировать">
+                <svg class="cm-icon cm-icon--sm"><use href="#icon-copy"/></svg>
+              </button>
+            </div>
+          </div>
+          <textarea class="cm-textarea" id="markovDecodeResult" readonly placeholder="Декодированное сообщение…" rows="3"></textarea>
+        </div>
+      </div>
+    </div><!-- /panelMarkovStego -->
+
+    <!-- ─── LLM Stego Panel ─────────────────────────────────── -->
+    <div class="cm-input-panel" id="panelLlmStego" data-category-panel="llm-encode">
+      <details class="cm-help-collapsible">
+        <summary class="cm-help-collapsible__summary">📖 Справка по LLM Стего</summary>
+        <div class="cm-help-collapsible__body">
+          <p><b>LLM Стего</b> — стеганография на основе языковой модели. Скрытое сообщение встраивается в выбор токенов при генерации текста.</p>
+          <p><b>Backend</b> — Python сервис (stego-v4) с GGUF моделью. Должен быть запущен на вашем ПК.</p>
+          <p><b>Ёмкость:</b> ~1-2 байта на токен. Для 100 байт нужно ~50-100 токенов генерации.</p>
+        </div>
+      </details>
+      <div class="cm-field-group">
+        <div class="cm-carrier-header">
+          <label class="cm-input-label">Подключение</label>
+          <div class="cm-carrier-header__actions">
+            <span class="cm-stego-capacity-badge" id="llmStatusText" style="cursor:pointer">Не подключён</span>
+            <span id="llmStatusDot" style="width:8px;height:8px;border-radius:50%;background:var(--cm-text-muted);display:inline-block;margin-left:4px"></span>
+          </div>
+        </div>
+        <div class="cm-input-row">
+          <input class="cm-input" id="llmEndpointInput" type="text" placeholder="http://localhost:8089" autocomplete="off" style="flex:1">
+          <input class="cm-input" id="llmPortInput" type="number" value="8089" min="1" max="65535" style="width:70px">
+          <button class="cm-btn cm-btn--secondary cm-btn--compact" id="llmConnectBtn" type="button">Подключить</button>
+        </div>
+      </div>
+      <div id="llmEncodeSection">
+        <div class="cm-field-group">
+          <label class="cm-input-label" for="llmSecretInput">Секретное сообщение</label>
+          <textarea class="cm-textarea" id="llmSecretInput" placeholder="Секретное сообщение (макс. 500 символов)…" rows="2" maxlength="500"></textarea>
+        </div>
+        <div class="cm-input-row">
+          <div class="cm-field-group" style="flex:1">
+            <label class="cm-input-label" for="llmSeedText">Seed текст</label>
+            <input class="cm-input" id="llmSeedText" type="text" value="Привет—" maxlength="100">
+          </div>
+          <div class="cm-field-group" style="flex:1">
+            <label class="cm-input-label" for="llmContext">Контекст</label>
+            <input class="cm-input" id="llmContext" type="text" value="Разговор">
+          </div>
+        </div>
+        <div class="cm-input-row">
+          <div class="cm-field-group" style="flex:1">
+            <label class="cm-input-label" for="llmTopK">top_k</label>
+            <input class="cm-input" id="llmTopK" type="number" value="8" min="2" max="32">
+          </div>
+          <div class="cm-field-group" style="flex:1">
+            <label class="cm-input-label" for="llmTemperature">temperature</label>
+            <input class="cm-input" id="llmTemperature" type="number" value="0.8" min="0.1" max="2.0" step="0.1">
+          </div>
+          <div class="cm-field-group" style="flex:1">
+            <label class="cm-input-label" for="llmAutoAccept">auto_accept</label>
+            <input class="cm-input" id="llmAutoAccept" type="number" value="0.50" min="0" max="1.0" step="0.05">
+          </div>
+        </div>
+        <div class="cm-input-row">
+          <div class="cm-checkbox-row">
+            <input type="checkbox" id="llmNaturalCompletion" checked>
+            <label for="llmNaturalCompletion">Естественное завершение</label>
+          </div>
+          <div class="cm-checkbox-row">
+            <input type="checkbox" id="llmStreamToggle" checked>
+            <label for="llmStreamToggle">Потоковая генерация (SSE)</label>
+          </div>
+        </div>
+        <div class="cm-input-row">
+          <div style="flex:1"></div>
+          <button class="cm-btn cm-btn--secondary cm-btn--compact" id="llmCapacityBtn" type="button">Ёмкость</button>
+          <button class="cm-btn cm-btn--primary" id="llmEncodeBtn" type="button">
+            <svg class="cm-icon cm-icon--sm"><use href="#icon-zap"/></svg> Кодировать
+          </button>
+          <button class="cm-btn cm-btn--secondary" id="llmEncodeCancelBtn" type="button" style="display:none">Отмена</button>
+        </div>
+        <div id="llmCapacityResult" style="display:none;margin-top:6px">
+          <span class="cm-stego-capacity-badge" id="llmCapacityText"></span>
+        </div>
+        <div id="llmEncodeProgress" style="display:none;margin-top:6px">
+          <div class="cm-loading__progress">
+            <div class="cm-loading__progress-bar" id="llmEncodeProgressBar" style="width:0%"></div>
+          </div>
+          <span id="llmEncodeProgressText" style="font-size:11px;color:var(--cm-text-muted)">...</span>
+        </div>
+        <div id="llmEncodePartialSection" style="display:none;margin-top:6px">
+          <label class="cm-input-label">Генерируемый текст</label>
+          <textarea class="cm-textarea cm-textarea--tall" id="llmEncodePartial" readonly rows="4"></textarea>
+        </div>
+        <div class="cm-stego-result-section" id="llmEncodeResultSection" style="display:none">
+          <div class="cm-stego-preview-header">
+            <span class="cm-input-label">Полный стего-текст</span>
+            <div class="cm-stego-preview-actions">
+              <button class="cm-btn cm-btn--secondary cm-btn--compact" id="llmCopyResult" type="button" title="Копировать">
+                <svg class="cm-icon cm-icon--sm"><use href="#icon-copy"/></svg>
+              </button>
+            </div>
+          </div>
+          <textarea class="cm-textarea cm-textarea--tall" id="llmEncodeResult" readonly rows="4"></textarea>
+          <div id="llmEncodeStats" style="font-size:11px;color:var(--cm-text-muted);margin-top:4px;line-height:1.5"></div>
+        </div>
+      </div>
+      <div id="llmDecodeSection" style="display:none">
+        <div class="cm-field-group">
+          <label class="cm-input-label" for="llmDecodeInput">Полный текст (с seed)</label>
+          <textarea class="cm-textarea cm-textarea--tall" id="llmDecodeInput" placeholder="Вставьте полный текст включая seed…" rows="4"></textarea>
+        </div>
+        <div class="cm-input-row">
+          <div class="cm-field-group" style="flex:1">
+            <label class="cm-input-label" for="llmDecodeContext">Контекст</label>
+            <input class="cm-input" id="llmDecodeContext" type="text" value="Разговор">
+          </div>
+          <div class="cm-field-group" style="flex:1">
+            <label class="cm-input-label" for="llmDecodeTopK">top_k</label>
+            <input class="cm-input" id="llmDecodeTopK" type="number" value="8" min="2" max="32">
+          </div>
+        </div>
+        <div class="cm-input-row">
+          <div style="flex:1"></div>
+          <button class="cm-btn cm-btn--primary" id="llmDecodeBtn" type="button">
+            <svg class="cm-icon cm-icon--sm"><use href="#icon-unlock"/></svg> Декодировать
+          </button>
+        </div>
+        <div id="llmDecodeProgress" style="display:none;margin-top:6px">
+          <span id="llmDecodeProgressText" style="font-size:11px;color:var(--cm-text-muted)">Декодирование...</span>
+        </div>
+        <div class="cm-stego-result-section" id="llmDecodeResultSection" style="display:none">
+          <div class="cm-stego-preview-header">
+            <span class="cm-input-label">Декодированное сообщение</span>
+            <div class="cm-stego-preview-actions">
+              <button class="cm-btn cm-btn--secondary cm-btn--compact" id="llmCopyDecodeResult" type="button" title="Копировать">
+                <svg class="cm-icon cm-icon--sm"><use href="#icon-copy"/></svg>
+              </button>
+            </div>
+          </div>
+          <textarea class="cm-textarea" id="llmDecodeResult" readonly rows="3"></textarea>
+          <div id="llmDecodeStats" style="font-size:11px;color:var(--cm-text-muted);margin-top:4px;line-height:1.5"></div>
+        </div>
+      </div>
+    </div><!-- /panelLlmStego -->
+
+  </div><!-- /cm-input-area -->
+
+  <!-- ═══════════════════════════════════════════════════════════
+       Settings Panel (slide-out from right)
+       ═══════════════════════════════════════════════════════════ -->
+  <div class="cm-settings-overlay" id="settingsOverlay"></div>
+  <aside class="cm-settings" id="settingsPanel">
+    <div class="cm-settings__header">
+      <span class="cm-settings__title"><svg class="cm-icon cm-icon--sm"><use href="#icon-settings"/></svg> Настройки</span>
+      <button class="cm-settings__close" id="btnCloseSettings" type="button" aria-label="Закрыть"><svg class="cm-icon cm-icon--sm"><use href="#icon-x"/></svg></button>
+    </div>
+    <div class="cm-settings__body">
+
+      <!-- ─── Пароли чатов ──────────────────────────────────── -->
+      <div class="cm-settings__section">
+        <div class="cm-settings__section-title">Пароли чатов</div>
+
+        <div class="cm-settings__row">
+          <span class="cm-settings__label">Текущий ID чата</span>
+          <input
+            class="cm-settings__input"
+            id="settingCurrentChatId"
+            type="text"
+            placeholder="chat-id"
+            autocomplete="off"
+            style="max-width:120px;"
+          >
+        </div>
+
+        <div class="cm-settings__row">
+          <span class="cm-settings__label">Сохранять пароль для чата</span>
+          <label class="cm-toggle">
+            <input type="checkbox" id="settingRememberPw">
+            <span class="cm-toggle__track"></span>
+          </label>
+        </div>
+
+        <!-- Chat password list (populated by JS) -->
+        <div id="chatPasswordList">
+          <!-- Example entry (hidden by default, used as template) -->
+          <!--
+          <div class="cm-chat-entry">
+            <span class="cm-chat-entry__id">abc123</span>
+            <span class="cm-chat-entry__pw">••••••</span>
+            <button class="cm-chat-entry__remove" type="button"><svg class="cm-icon cm-icon--sm"><use href="#icon-trash"/></svg></button>
+          </div>
+          -->
+        </div>
+
+        <div class="cm-input-row" style="gap:6px;">
+          <input
+            class="cm-input cm-input--compact"
+            id="newChatIdInput"
+            type="text"
+            placeholder="ID чата"
+            autocomplete="off"
+            style="flex:1;"
+          >
+          <input
+            class="cm-input cm-input--compact"
+            id="newChatPwInput"
+            type="password"
+            placeholder="Пароль"
+            autocomplete="off"
+            style="flex:1;"
+          >
+          <button class="cm-btn cm-btn--secondary" id="btnAddChatPw" type="button"><svg class="cm-icon cm-icon--sm"><use href="#icon-plus"/></svg></button>
+        </div>
+      </div>
+
+      <!-- ─── Каналы стего (only visible in stego mode) ──────── -->
+      <div class="cm-settings__section cm-settings__section--stego-channels" id="stegoChannelsSection">
+        <div class="cm-settings__section-title">Каналы стего</div>
+        <div class="cm-settings__note">Каналы определяются автоматически по тексту-носителю. Большинство каналов всегда активны — они необходимы для корректного декодирования.</div>
+
+        <!-- Always-on channels (informational, no toggle) -->
+        <div class="cm-channel-list">
+          <span class="cm-channel-list__item cm-channel-list__item--always">Пунктуация</span>
+          <span class="cm-channel-list__item cm-channel-list__item--always">Форматы дат</span>
+          <span class="cm-channel-list__item cm-channel-list__item--always">Опечатки (дефисы)</span>
+          <span class="cm-channel-list__item cm-channel-list__item--always">Дублеты</span>
+          <span class="cm-channel-list__item cm-channel-list__item--always">Пробелы (NBSP)</span>
+          <span class="cm-channel-list__item cm-channel-list__item--always">Синонимы</span>
+          <span class="cm-channel-list__item cm-channel-list__item--always">Телефоны</span>
+          <span class="cm-channel-list__item cm-channel-list__item--always">URL-адреса</span>
+          <span class="cm-channel-list__item cm-channel-list__item--always">Email-адреса</span>
+          <span class="cm-channel-list__item cm-channel-list__item--always">ФИО <small>[steg-fio]</small></span>
+          <span class="cm-channel-list__item cm-channel-list__item--always">Слова-паразиты <small>19 групп</small></span>
+          <span class="cm-channel-list__item cm-channel-list__item--always">Эмодзи <small>20 групп × 8</small></span>
+          <span class="cm-channel-list__item cm-channel-list__item--tag" title="Теговые каналы — вставляются через алиасы в тексте">ПК-комплектующие <small>[steg-pc-*]</small></span>
+          <span class="cm-channel-list__item cm-channel-list__item--tag" title="Теговые каналы — вставляются через алиасы в тексте">Автозапчасти <small>[steg-auto-*]</small></span>
+          <span class="cm-channel-list__item cm-channel-list__item--tag" title="Теговые каналы — вставляются через алиасы в тексте">Гаджеты <small>[steg-gadget-*]</small></span>
+          <span class="cm-channel-list__item cm-channel-list__item--tag" title="Теговый канал — адреса РФ с сокращениями как доп. биты">Адреса РФ <small>[steg-address]</small></span>
+          <span class="cm-channel-list__item cm-channel-list__item--tag" title="Теговый канал — музыкальные треки (8192×8192)">Музыка <small>[stego-music]</small></span>
+          <span class="cm-channel-list__item cm-channel-list__item--tag" title="Теговый канал — полноценные файлы кода (256 бит/тег)">Код <small>[steg-code-*]</small></span>
+          <span class="cm-channel-list__item cm-channel-list__item--tag" title="Теговый канал — JSON конфиги с UUID (128 бит/тег!)">JSON <small>[steg-json]</small></span>
+          <span class="cm-channel-list__item cm-channel-list__item--tag" title="Категоризированные слова — фильмы, игры, породы (поиск в тексте)">Категории <small>[steg-movie] [steg-videogame] [steg-dog] [steg-cat]</small></span>
+        </div>
+
+        <!-- Optional channel: letter-stego (safe to disable) -->
+        <div class="cm-checkbox-row">
+          <input type="checkbox" class="channel-toggle" data-channel="letter-stego" id="chLetterStego" checked>
+          <label for="chLetterStego">Буквенное стего (мутации букв)</label>
+        </div>
+        <div class="cm-settings__note">Единственный канал, который можно отключить — декодер проигнорирует его автоматически. Уменьшает ёмкость, но текст выглядит естественнее.</div>
+      </div>
+
+      <!-- ─── Синонимы ──────────────────────────────────────── -->
+      <div class="cm-settings__section">
+        <div class="cm-settings__section-title">Синонимы</div>
+
+        <div class="cm-settings__row">
+          <span class="cm-settings__label">Порог (cos)</span>
+          <div style="display:flex; align-items:center; gap:8px; flex:1; max-width:140px;">
+            <input class="cm-slider" id="syn-threshold" type="range" min="0.5" max="0.99" step="0.01" value="0.7" style="flex:1;">
+            <span class="cm-settings__value" id="threshold-val">0.70</span>
+          </div>
+        </div>
+
+        <div class="cm-settings__row">
+          <span class="cm-settings__label">Режим</span>
+          <div style="display:flex; gap:4px;">
+            <button class="cm-btn cm-btn--toggle syn-mode-btn active" data-synmode="static" type="button">Статический</button>
+            <button class="cm-btn cm-btn--toggle syn-mode-btn" data-synmode="backend" type="button">Сервер</button>
+          </div>
+        </div>
+        <div class="cm-settings__row cm-hidden" id="backend-url-row">
+          <span class="cm-settings__label">URL сервера</span>
+          <input class="cm-settings__input" id="backend-url" type="url" placeholder="http://localhost:8000" style="max-width:160px;">
+        </div>
+        <div class="cm-settings__row cm-hidden" id="backend-status-row">
+          <span class="cm-settings__label">Статус</span>
+          <span id="backend-status" style="font-size:12px; color:var(--cm-text-muted);">—</span>
+        </div>
+        <div class="cm-settings__row cm-hidden" id="backend-check-row">
+          <div style="flex:1;"></div>
+          <button class="cm-btn cm-btn--secondary" id="btn-check-backend" type="button">Проверить</button>
+        </div>
+      </div>
+
+      <!-- ─── Статистика ─────────────────────────────────────── -->
+      <div class="cm-settings__section">
+        <div class="cm-settings__section-title">Статистика</div>
+        <div class="cm-settings__row">
+          <span class="cm-settings__label">Каналы</span>
+          <span class="cm-settings__value" id="stat-channels">0</span>
+        </div>
+        <div class="cm-settings__row">
+          <span class="cm-settings__label">Бит ёмкости</span>
+          <span class="cm-settings__value" id="stat-bits">0</span>
+        </div>
+        <div class="cm-settings__row">
+          <span class="cm-settings__label">Эффективность</span>
+          <span class="cm-settings__value" id="stat-efficiency">0%</span>
+        </div>
+        <div class="cm-settings__row">
+          <span class="cm-settings__label">Время</span>
+          <span class="cm-settings__value" id="stat-time">0 мс</span>
+        </div>
+        <div class="cm-settings__row">
+          <span class="cm-settings__label">Длина секр. сообщения</span>
+          <span class="cm-settings__value"><span id="secret-length">0</span> симв (<span id="secret-bytes">0</span> байт)</span>
+        </div>
+      </div>
+
+    </div><!-- /cm-settings__body -->
+  </aside>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       Floating Action Button (FAB) — Universal Send
+       ═══════════════════════════════════════════════════════════ -->
+  <button class="cm-fab" id="btnFabSend" type="button" aria-label="Отправить" disabled>
+    <svg class="cm-icon"><use href="#icon-send"/></svg>
+  </button>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       Toast / Notification Area
+       ═══════════════════════════════════════════════════════════ -->
+  <div class="cm-toast-area" id="toastArea"></div>
+
+</div><!-- /crypto-messenger -->
+
+<!-- ═════════════════════════════════════════════════════════════
+     Scripts — Az.js morphological libs first, then main.js as module
+     ═════════════════════════════════════════════════════════════ -->
+<script src="vendor/emoji-mart/emoji-mart.js"></script>
+<script src="lib/st3gg/text-overlay.js"></script>
+<script src="lib/st3gg/dct-qim-dsss.js"></script>
+<script src="lib/markov-text-stego.js"></script>
+<script src="lib/az.js"></script>
+<script src="lib/az.morph.js"></script>
+<script src="lib/az.dawg.js"></script>
+<script src="lib/az.tokens.js"></script>
+<script src="lib/az.syntax.js"></script>
+<script src="lib/pako.min.js"></script>
+<script src="lib/morph-compress.js"></script>
+<script type="module" src="js/emoji-picker.js"></script>
+<script type="module" src="js/ui/emoji-stego-ui.js"></script>
+<script type="module" src="js/ui/markov-stego-ui.js"></script>
+<script type="module" src="js/ui/llm-stego-ui.js"></script>
+<script type="module" src="js/main.js"></script>
+
+</body>
+</html>

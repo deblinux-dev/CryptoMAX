@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=300, initial-scale=1.0">
+<title>CryptoMAX Panel</title>
+<style>
+    /* ─── Reset & Base ─────────────────────────────────── */
+    *, *::before, *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    :root {
+        --bg-primary: #0b0d13;
+        --bg-secondary: #12151e;
+        --bg-tertiary: #1a1e2a;
+        --bg-input: #1e2230;
+        --border-color: #2a2e3d;
+        --text-primary: #e4e6eb;
+        --text-secondary: #8b8fa3;
+        --text-muted: #5c6070;
+        --accent-green: #00d26a;
+        --accent-green-hover: #00b85c;
+        --accent-green-dim: rgba(0, 210, 106, 0.15);
+        --accent-red: #ff4757;
+        --accent-red-dim: rgba(255, 71, 87, 0.15);
+        --accent-yellow: #ffc048;
+        --radius: 8px;
+        --radius-sm: 6px;
+    }
+
+    html, body {
+        width: 300px;
+        height: 100vh;
+        overflow: hidden;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        font-size: 13px;
+        color: var(--text-primary);
+        background: var(--bg-primary);
+        -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+    }
+
+    /* ─── Scrollbar ─────────────────────────────────────── */
+    ::-webkit-scrollbar {
+        width: 5px;
+    }
+    ::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+        background: var(--border-color);
+        border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+        background: var(--text-muted);
+    }
+
+    /* ─── Header ─────────────────────────────────────────── */
+    .panel-header {
+        padding: 12px 16px;
+        background: var(--bg-secondary);
+        border-bottom: 1px solid var(--border-color);
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .logo-icon {
+        width: 28px;
+        height: 28px;
+        border-radius: 8px;
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
+        /* CryptoMax app icon (extracted from assets/CryptoMax.ico) */
+        background-image: url('./assets/icons/cryptomax-64.png');
+        flex-shrink: 0;
+    }
+
+    .logo-text {
+        font-size: 15px;
+        font-weight: 700;
+        color: var(--text-primary);
+        letter-spacing: -0.3px;
+    }
+
+    .logo-version {
+        font-size: 10px;
+        color: var(--text-muted);
+        margin-left: auto;
+    }
+
+    .engine-status {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--text-muted);
+        flex-shrink: 0;
+        margin-left: 8px;
+    }
+
+    .engine-status.ready {
+        background: var(--accent-green);
+        box-shadow: 0 0 6px var(--accent-green);
+    }
+
+    .engine-status.error {
+        background: var(--accent-red);
+    }
+
+    /* ─── Content ────────────────────────────────────────── */
+    .panel-content {
+        flex: 1;
+        overflow-y: auto;
+        padding: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    /* ─── Section ────────────────────────────────────────── */
+    .section {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius);
+        padding: 12px;
+    }
+
+    .section-title {
+        font-size: 10px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        color: var(--text-muted);
+        margin-bottom: 10px;
+    }
+
+    /* ─── Toggle Switch ─────────────────────────────────── */
+    .toggle-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .toggle-label {
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--text-primary);
+    }
+
+    .toggle-switch {
+        position: relative;
+        width: 42px;
+        height: 24px;
+        cursor: pointer;
+    }
+
+    .toggle-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .toggle-slider {
+        position: absolute;
+        inset: 0;
+        background: var(--bg-tertiary);
+        border-radius: 12px;
+        border: 1px solid var(--border-color);
+        transition: all 0.25s ease;
+    }
+
+    .toggle-slider::before {
+        content: '';
+        position: absolute;
+        width: 18px;
+        height: 18px;
+        left: 2px;
+        top: 2px;
+        background: var(--text-secondary);
+        border-radius: 50%;
+        transition: all 0.25s ease;
+    }
+
+    .toggle-switch input:checked + .toggle-slider {
+        background: var(--accent-green-dim);
+        border-color: var(--accent-green);
+    }
+
+    .toggle-switch input:checked + .toggle-slider::before {
+        transform: translateX(18px);
+        background: var(--accent-green);
+    }
+
+    /* ─── Select ─────────────────────────────────────────── */
+    .cm-select {
+        width: 100%;
+        height: 34px;
+        padding: 0 10px;
+        background: var(--bg-input);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-sm);
+        color: var(--text-primary);
+        font-size: 13px;
+        appearance: none;
+        cursor: pointer;
+        background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%238b8fa3' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 10px center;
+    }
+
+    .cm-select:focus {
+        outline: none;
+        border-color: var(--accent-green);
+    }
+
+    /* ─── Password Field ─────────────────────────────────── */
+    .password-row {
+        display: flex;
+        gap: 6px;
+    }
+
+    .cm-input {
+        flex: 1;
+        height: 34px;
+        padding: 0 10px;
+        background: var(--bg-input);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-sm);
+        color: var(--text-primary);
+        font-size: 13px;
+        font-family: inherit;
+    }
+
+    .cm-input:focus {
+        outline: none;
+        border-color: var(--accent-green);
+    }
+
+    .cm-input::placeholder {
+        color: var(--text-muted);
+    }
+
+    .btn-icon {
+        width: 34px;
+        height: 34px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--bg-tertiary);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-sm);
+        color: var(--text-secondary);
+        cursor: pointer;
+        font-size: 14px;
+        transition: all 0.2s ease;
+        flex-shrink: 0;
+    }
+
+    .panel-ico {
+        width: 16px;
+        height: 16px;
+        pointer-events: none;
+    }
+
+    .btn-icon:hover {
+        background: var(--bg-input);
+        color: var(--text-primary);
+    }
+
+    /* ─── Chat Info ──────────────────────────────────────── */
+    .chat-info {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 10px;
+        background: var(--bg-tertiary);
+        border-radius: var(--radius-sm);
+    }
+
+    .chat-info-icon {
+        color: var(--accent-green);
+        font-size: 14px;
+        flex-shrink: 0;
+    }
+
+    .chat-info-text {
+        font-size: 12px;
+        color: var(--text-secondary);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .chat-info-id {
+        font-family: 'SF Mono', 'Fira Code', monospace;
+        color: var(--text-muted);
+        font-size: 11px;
+    }
+
+    /* ─── Textarea ────────────────────────────────────────── */
+    .cm-textarea {
+        width: 100%;
+        min-height: 80px;
+        max-height: 200px;
+        padding: 10px;
+        background: var(--bg-input);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-sm);
+        color: var(--text-primary);
+        font-size: 13px;
+        font-family: inherit;
+        resize: vertical;
+        line-height: 1.5;
+    }
+
+    .cm-textarea:focus {
+        outline: none;
+        border-color: var(--accent-green);
+    }
+
+    .cm-textarea::placeholder {
+        color: var(--text-muted);
+    }
+
+    /* ─── Buttons ───────────────────────────────────────── */
+    .btn-send {
+        width: 100%;
+        height: 40px;
+        background: var(--accent-green);
+        color: #fff;
+        border: none;
+        border-radius: var(--radius);
+        font-size: 14px;
+        font-weight: 600;
+        font-family: inherit;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+
+    .btn-send:hover {
+        background: var(--accent-green-hover);
+    }
+
+    .btn-send:active {
+        transform: scale(0.98);
+    }
+
+    .btn-send:disabled {
+        background: var(--bg-tertiary);
+        color: var(--text-muted);
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .btn-send .send-icon {
+        width: 14px;
+        height: 14px;
+        flex-shrink: 0;
+        pointer-events: none;
+    }
+
+
+
+    /* ─── Footer ─────────────────────────────────────────── */
+    .panel-footer {
+        padding: 8px 12px;
+        background: var(--bg-secondary);
+        border-top: 1px solid var(--border-color);
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .btn-footer {
+        flex: 1;
+        height: 32px;
+        background: var(--bg-tertiary);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-sm);
+        color: var(--text-secondary);
+        font-size: 11px;
+        font-family: inherit;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        transition: all 0.2s ease;
+    }
+
+    .btn-footer:hover {
+        background: var(--bg-input);
+        color: var(--text-primary);
+    }
+
+    /* ─── Toast ──────────────────────────────────────────── */
+    .toast {
+        position: fixed;
+        top: 12px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 8px 16px;
+        background: var(--bg-tertiary);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius);
+        color: var(--text-primary);
+        font-size: 12px;
+        z-index: 1000;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        pointer-events: none;
+        max-width: 260px;
+        text-align: center;
+    }
+
+    .toast.show {
+        opacity: 1;
+    }
+
+    .toast.success {
+        border-color: var(--accent-green);
+        background: rgba(0, 210, 106, 0.15);
+    }
+
+    .toast.error {
+        border-color: var(--accent-red);
+        background: rgba(255, 71, 87, 0.15);
+    }
+
+    /* ─── Password Hint ──────────────────────────────────── */
+    .password-saved {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 8px;
+        background: var(--accent-green-dim);
+        border-radius: var(--radius-sm);
+        margin-top: 8px;
+        font-size: 11px;
+        color: var(--accent-green);
+    }
+
+    .password-saved.no-password {
+        background: var(--bg-tertiary);
+        color: var(--text-muted);
+    }
+
+    /* ─── Settings Modal ─────────────────────────────────── */
+    .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.6);
+        z-index: 100;
+        display: none;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal-overlay.show {
+        display: flex;
+    }
+
+    .modal {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius);
+        width: 260px;
+        padding: 16px;
+    }
+
+    .modal h3 {
+        font-size: 14px;
+        margin-bottom: 12px;
+    }
+
+    .modal-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 8px 0;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .modal-row:last-child {
+        border-bottom: none;
+    }
+
+    .modal-close {
+        width: 100%;
+        height: 32px;
+        background: var(--bg-tertiary);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-sm);
+        color: var(--text-primary);
+        font-size: 12px;
+        font-family: inherit;
+        cursor: pointer;
+        margin-top: 12px;
+    }
+
+    .modal-close:hover {
+        background: var(--bg-input);
+    }
+
+    /* ─── Engine Loading Overlay ─────────────────────────── */
+    .engine-loading {
+        text-align: center;
+        padding: 16px;
+        color: var(--text-muted);
+        font-size: 12px;
+    }
+
+    .engine-loading .spinner {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 2px solid var(--border-color);
+        border-top-color: var(--accent-green);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        margin-bottom: 8px;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    /* ─── Flex helpers ───────────────────────────────────── */
+    .flex-col { display: flex; flex-direction: column; }
+    .gap-8 { gap: 8px; }
+    .gap-6 { gap: 6px; }
+    .flex-grow { flex: 1; min-height: 0; }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="panel-header">
+    <div class="logo-icon"></div>
+    <span class="logo-text">CryptoMAX</span>
+    <span class="logo-version">v1.10</span>
+    <div class="engine-status" id="engineStatus" title="Движок шифрования"></div>
+</div>
+
+<!-- Content -->
+<div class="panel-content" id="panelContent">
+
+    <!-- Encryption Toggle -->
+    <div class="section">
+        <div class="toggle-row">
+            <span class="toggle-label">🔐 Шифрование</span>
+            <label class="toggle-switch">
+                <input type="checkbox" id="encToggle" checked>
+                <span class="toggle-slider"></span>
+            </label>
+        </div>
+    </div>
+
+    <!-- Mode & Password -->
+    <div class="section flex-col gap-8" id="cryptoControls">
+        <div>
+            <div class="section-title">Режим шифрования</div>
+            <select class="cm-select" id="modeSelect">
+                <option value="aes256">🔐 AES-256-GCM</option>
+                <option value="compact">🗜️ Компактный (1:1)</option>
+                <option value="textfile">📄 Криптоконтейнер (файл)</option>
+                <option value="layout">⌨️ Смена раскладки</option>
+                <option value="invisible">👻 Невидимые символы</option>
+                <option value="base64">🔤 Base64/85</option>
+                <option value="compression">📦 Deflate+B64</option>
+                <option value="emoji">😀 Эмодзи</option>
+                <option value="chinese">🈳 Иероглифы</option>
+            </select>
+        </div>
+        <div>
+            <div class="section-title">Пароль</div>
+            <div class="password-row">
+                <input type="password" class="cm-input" id="passwordInput" placeholder="Введите пароль">
+                <button class="btn-icon" id="togglePassword" title="Показать/скрыть">
+                    <svg class="panel-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+                <button class="btn-icon" id="savePassword" title="Сохранить">
+                    <svg class="panel-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                </button>
+            </div>
+            <div class="password-saved no-password" id="passwordHint">
+                Пароль не сохранён
+            </div>
+        </div>
+    </div>
+
+    <!-- Chat Info -->
+    <div class="section">
+        <div class="section-title">Текущий чат</div>
+        <div class="chat-info">
+            <svg class="chat-info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;flex-shrink:0;opacity:0.7;"><path d="M4 9h16"/><path d="M4 15h16"/><path d="M10 3 8 21"/><path d="M16 3l-2 18"/></svg>
+            <span class="chat-info-text" id="chatIdDisplay">Определение...</span>
+        </div>
+    </div>
+
+    <!-- Message Input -->
+    <div class="section flex-col gap-8">
+        <div class="section-title">Сообщение</div>
+        <textarea class="cm-textarea" id="messageInput" placeholder="Введите текст для шифрования..."></textarea>
+        <button class="btn-send" id="sendBtn" disabled>
+            <svg class="send-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+            Зашифровать и отправить
+        </button>
+    </div>
+
+
+</div>
+
+<!-- Footer -->
+<div class="panel-footer">
+    <button class="btn-footer" id="settingsBtn">
+        ⚙ Настройки
+    </button>
+
+</div>
+
+<!-- Settings Modal -->
+<div class="modal-overlay" id="settingsModal">
+    <div class="modal">
+        <h3>⚙ Настройки</h3>
+        <div class="modal-row">
+            <span style="font-size:12px">Авто-дешифровка</span>
+            <label class="toggle-switch">
+                <input type="checkbox" id="autoDecryptToggle" checked>
+                <span class="toggle-slider"></span>
+            </label>
+        </div>
+        <div class="modal-row">
+            <span style="font-size:12px;color:var(--text-muted)">Движок: Stegonator Full</span>
+        </div>
+        <div class="modal-row">
+            <span style="font-size:12px;color:var(--text-muted)">Версия: 2.0.0</span>
+        </div>
+        <button class="modal-close" id="closeSettings">Закрыть</button>
+    </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Engine Loader (loads pako, morph-compress, then ES module bootstrap) -->
+<script src="./engine/engine-loader.js"></script>
+
+<!-- Panel UI Logic -->
+<script>
+(function() {
+    'use strict';
+
+    // ─── DOM References ──────────────────────────────────
+    var encToggle = document.getElementById('encToggle');
+    var modeSelect = document.getElementById('modeSelect');
+    var passwordInput = document.getElementById('passwordInput');
+    var togglePasswordBtn = document.getElementById('togglePassword');
+    var savePasswordBtn = document.getElementById('savePassword');
+    var passwordHint = document.getElementById('passwordHint');
+    var chatIdDisplay = document.getElementById('chatIdDisplay');
+    var messageInput = document.getElementById('messageInput');
+    var sendBtn = document.getElementById('sendBtn');
+    var settingsBtn = document.getElementById('settingsBtn');
+    var settingsModal = document.getElementById('settingsModal');
+    var closeSettings = document.getElementById('closeSettings');
+    var autoDecryptToggle = document.getElementById('autoDecryptToggle');
+    var toast = document.getElementById('toast');
+    var engineStatus = document.getElementById('engineStatus');
+
+    // ─── State ───────────────────────────────────────────
+    var currentChatId = null;
+    var savedPasswords = {};
+    var appSettings = {};
+    var passwordVisible = false;
+    var engineReady = false;
+    var unsubscribe = null;
+
+    // ─── Toast ───────────────────────────────────────────
+    function showToast(msg, type) {
+        toast.textContent = msg;
+        toast.className = 'toast show ' + (type || '');
+        setTimeout(function() { toast.className = 'toast'; }, 2500);
+    }
+
+    // ─── Engine Status ───────────────────────────────────
+    function setEngineStatus(status) {
+        engineStatus.className = 'engine-status ' + status;
+    }
+
+    function onEngineReady() {
+        engineReady = true;
+        setEngineStatus('ready');
+        sendBtn.disabled = false;
+        showToast('Движок загружен', 'success');
+
+        // Populate mode select from engine if available
+        if (window.CryptoEngineAPI && window.CryptoEngineAPI.getSupportedModes) {
+            var modes = window.CryptoEngineAPI.getSupportedModes();
+            if (modes && modes.length > 0) {
+                var currentValue = modeSelect.value;
+                modeSelect.innerHTML = '';
+                for (var i = 0; i < modes.length; i++) {
+                    var m = modes[i];
+                    var opt = document.createElement('option');
+                    opt.value = m.id;
+                    opt.textContent = (m.icon || '') + ' ' + m.label;
+                    modeSelect.appendChild(opt);
+                }
+                // Restore previous selection if possible
+                if (currentValue) modeSelect.value = currentValue;
+            }
+        }
+    }
+
+    // Wait for engine to be ready
+    window.addEventListener('crypto-engine-ready', onEngineReady);
+    window.addEventListener('crypto-engine-error', function() {
+        setEngineStatus('error');
+        showToast('Ошибка загрузки движка: ' + (window._cryptoEngineError || 'неизвестная'), 'error');
+    });
+
+    // Also poll for engine ready (in case event fired before listener)
+    var engineCheckInterval = setInterval(function() {
+        if (window.CryptoEngineAPI && window.CryptoEngineAPI.isReady()) {
+            clearInterval(engineCheckInterval);
+            if (!engineReady) onEngineReady();
+        }
+    }, 200);
+
+    // ─── Initialize ──────────────────────────────────────
+    async function init() {
+        if (!window.CryptoMAXAPI) {
+            showToast('CryptoMAX API недоступен', 'error');
+            return;
+        }
+
+        // Load settings
+        try {
+            appSettings = await window.CryptoMAXAPI.getSettings();
+            encToggle.checked = appSettings.encryptionEnabled !== false;
+            modeSelect.value = appSettings.defaultMode || 'aes256';
+            if (appSettings.autoDecrypt !== undefined) {
+                autoDecryptToggle.checked = appSettings.autoDecrypt;
+            }
+        } catch (e) {
+            console.warn('Failed to load settings:', e);
+        }
+
+        // Load passwords
+        try {
+            savedPasswords = await window.CryptoMAXAPI.getPasswords();
+        } catch (e) {
+            console.warn('Failed to load passwords:', e);
+        }
+
+        updateChatId();
+        updatePasswordHint();
+
+        // Listen for incoming messages (decryption happens in-place via Shadow DOM in web.max.ru)
+        // No local message display needed
+        unsubscribe = window.CryptoMAXAPI.onMessage(function(msg) {
+            // Messages are decrypted and overlaid in the web.max.ru BrowserView via Shadow DOM
+        });
+
+        // Poll for chat ID changes (SPA navigation)
+        setInterval(updateChatId, 3000);
+    }
+
+    // ─── Chat ID ─────────────────────────────────────────
+    async function updateChatId() {
+        try {
+            var result = await window.CryptoMAXAPI.getChatId();
+            if (result.chatId && result.chatId !== currentChatId) {
+                currentChatId = result.chatId;
+                chatIdDisplay.innerHTML = '<span style="color:var(--text-primary)">Чат </span><span class="chat-info-id">' + currentChatId + '</span>';
+                updatePasswordHint();
+            } else if (!result.chatId && currentChatId) {
+                currentChatId = null;
+                chatIdDisplay.textContent = 'Нет чата';
+                updatePasswordHint();
+            }
+        } catch (e) {
+            chatIdDisplay.textContent = 'Ошибка определения';
+        }
+    }
+
+    function updatePasswordHint() {
+        if (!currentChatId) {
+            passwordHint.textContent = 'Пароль не сохранён';
+            passwordHint.className = 'password-saved no-password';
+            return;
+        }
+        if (savedPasswords[currentChatId]) {
+            passwordInput.value = savedPasswords[currentChatId];
+            passwordHint.textContent = '✓ Пароль сохранён для чата';
+            passwordHint.className = 'password-saved';
+        } else {
+            passwordHint.textContent = 'Пароль не сохранён';
+            passwordHint.className = 'password-saved no-password';
+        }
+    }
+
+    // ─── Send Message ───────────────────────────────────
+    async function handleSend() {
+        var text = messageInput.value.trim();
+        if (!text) {
+            showToast('Введите текст', 'error');
+            return;
+        }
+
+        // Check engine is ready
+        if (!engineReady || !window.CryptoEngineAPI) {
+            showToast('Движок шифрования не загружен', 'error');
+            return;
+        }
+
+        // Send plaintext if encryption is disabled
+        if (!encToggle.checked) {
+            try {
+                var result = await window.CryptoMAXAPI.sendToMax(text);
+                if (result.success) {
+                    messageInput.value = '';
+                    showToast('Отправлено');
+                } else {
+                    showToast('Ошибка: ' + result.error, 'error');
+                }
+            } catch (e) {
+                showToast('Ошибка: ' + e.message, 'error');
+            }
+            return;
+        }
+
+        var password = passwordInput.value;
+        if (!password) {
+            showToast('Введите пароль', 'error');
+            return;
+        }
+
+        var mode = modeSelect.value;
+        sendBtn.disabled = true;
+        sendBtn.innerHTML = '<svg class="send-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="animation: spin 0.8s linear infinite;"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Шифрование...';
+
+        try {
+            // Режим "Текст-файл": шифруем как .txt (CT1) и отправляем как файл
+            if (mode === 'textfile') {
+                var txtResult = await window.CryptoMAXAPI.encryptTextFile({
+                    text: text,
+                    password: password,
+                    chatId: currentChatId || '',
+                });
+                if (txtResult.success) {
+                    messageInput.value = '';
+                    showToast('✓ Зашифровано как .txt и отправлено (' + Math.round(txtResult.size / 1024) + ' КБ)', 'success');
+                } else {
+                    showToast('Ошибка: ' + (txtResult.error || ''), 'error');
+                }
+            } else {
+                // Encrypt in-panel using CryptoEngineAPI (full Stegonator engine)
+                var encoded = await window.CryptoEngineAPI.encrypt(text, password, mode, currentChatId || '');
+
+                // Send encrypted text to web.max.ru
+                var sendResult = await window.CryptoMAXAPI.sendToMax(encoded);
+
+                if (sendResult.success) {
+                    messageInput.value = '';
+                    showToast('✓ Зашифровано и отправлено', 'success');
+                } else {
+                    showToast('Ошибка отправки: ' + (sendResult.error || ''), 'error');
+                }
+            }
+        } catch (e) {
+            showToast('Ошибка: ' + e.message, 'error');
+        } finally {
+            sendBtn.disabled = false;
+            sendBtn.innerHTML = '<svg class="send-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg> Зашифровать и отправить';
+        }
+    }
+
+    // ─── Event Listeners ─────────────────────────────────
+    sendBtn.addEventListener('click', handleSend);
+
+    messageInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+            e.preventDefault();
+            handleSend();
+        }
+    });
+
+    // Lucide eye / eye-off SVG (offline)
+    var ICO_EYE = '<svg class="panel-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>';
+    var ICO_EYE_OFF = '<svg class="panel-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" y1="2" x2="22" y2="22"/></svg>';
+
+    togglePasswordBtn.addEventListener('click', function() {
+        passwordVisible = !passwordVisible;
+        passwordInput.type = passwordVisible ? 'text' : 'password';
+        togglePasswordBtn.innerHTML = passwordVisible ? ICO_EYE_OFF : ICO_EYE;
+    });
+
+    savePasswordBtn.addEventListener('click', async function() {
+        if (!currentChatId) {
+            showToast('Сначала откройте чат', 'error');
+            return;
+        }
+
+        var pwd = passwordInput.value;
+        try {
+            if (pwd) {
+                await window.CryptoMAXAPI.setPassword(currentChatId, pwd);
+                savedPasswords[currentChatId] = pwd;
+                passwordHint.textContent = '✓ Пароль сохранён';
+                passwordHint.className = 'password-saved';
+                showToast('Пароль сохранён', 'success');
+            } else {
+                await window.CryptoMAXAPI.setPassword(currentChatId, '');
+                delete savedPasswords[currentChatId];
+                passwordHint.textContent = 'Пароль не сохранён';
+                passwordHint.className = 'password-saved no-password';
+                showToast('Пароль удалён');
+            }
+        } catch (e) {
+            showToast('Ошибка сохранения: ' + e.message, 'error');
+        }
+    });
+
+    encToggle.addEventListener('change', async function() {
+        appSettings.encryptionEnabled = encToggle.checked;
+        try {
+            await window.CryptoMAXAPI.saveSettings(appSettings);
+        } catch (e) { /* ignore */ }
+    });
+
+    modeSelect.addEventListener('change', async function() {
+        appSettings.defaultMode = modeSelect.value;
+        try {
+            await window.CryptoMAXAPI.saveSettings(appSettings);
+        } catch (e) { /* ignore */ }
+    });
+
+    settingsBtn.addEventListener('click', function() {
+        settingsModal.classList.add('show');
+    });
+
+    closeSettings.addEventListener('click', function() {
+        settingsModal.classList.remove('show');
+    });
+
+    settingsModal.addEventListener('click', function(e) {
+        if (e.target === settingsModal) {
+            settingsModal.classList.remove('show');
+        }
+    });
+
+    autoDecryptToggle.addEventListener('change', async function() {
+        appSettings.autoDecrypt = autoDecryptToggle.checked;
+        try {
+            await window.CryptoMAXAPI.saveSettings(appSettings);
+        } catch (e) { /* ignore */ }
+    });
+
+    // ─── Start ───────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', init);
+    if (document.readyState !== 'loading') init();
+
+})();
+</script>
+
+</body>
+</html>

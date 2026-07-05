@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>CryptoMAX Toolbar</title>
+<style>
+    /* ─── Reset ──────────────────────────────────────────── */
+    *, *::before, *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    html, body {
+        width: 100%;
+        height: 36px;
+        overflow: hidden;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        font-size: 12px;
+        color: #c8cad0;
+        background: #0e1018;
+        -webkit-font-smoothing: antialiased;
+        user-select: none;
+    }
+
+    body {
+        display: flex;
+        align-items: center;
+        height: 36px;
+        /* Entire toolbar is a drag region for window movement */
+        -webkit-app-region: drag;
+    }
+
+    /* ─── Drag Region (spacer) ──────────────────────────── */
+    .drag-spacer {
+        flex: 1;
+        height: 100%;
+        /* This area is draggable (inherits -webkit-app-region: drag from body) */
+    }
+
+    /* ─── Logo ──────────────────────────────────────────── */
+    .toolbar-logo {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 0 12px 0 14px;
+        height: 100%;
+        flex-shrink: 0;
+    }
+
+    .toolbar-logo-icon {
+        width: 20px;
+        height: 20px;
+        border-radius: 4px;
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
+        /* CryptoMax app icon (extracted from assets/CryptoMax.ico) */
+        background-image: url('./assets/icons/cryptomax-64.png');
+        flex-shrink: 0;
+    }
+
+    .toolbar-logo-text {
+        font-weight: 600;
+        font-size: 12px;
+        color: #e4e6eb;
+        letter-spacing: 0.3px;
+    }
+
+    .toolbar-logo-ver {
+        font-size: 9px;
+        color: #5c6070;
+        font-weight: 400;
+    }
+
+    /* ─── Separator ─────────────────────────────────────── */
+    .toolbar-sep {
+        width: 1px;
+        height: 18px;
+        background: #2a2e3d;
+        margin: 0 6px;
+        flex-shrink: 0;
+    }
+
+    /* ─── Zoom Controls ─────────────────────────────────── */
+    .zoom-controls {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 0 8px;
+        height: 100%;
+        flex-shrink: 0;
+        /* Clickable elements must be non-draggable */
+        -webkit-app-region: no-drag;
+    }
+
+    .zoom-label {
+        font-size: 11px;
+        color: #8b8fa3;
+        white-space: nowrap;
+    }
+
+    .zoom-btn {
+        width: 24px;
+        height: 24px;
+        border: 1px solid #2a2e3d;
+        border-radius: 4px;
+        background: #161922;
+        color: #c8cad0;
+        font-size: 14px;
+        line-height: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.15s ease;
+        padding: 0;
+    }
+
+    .zoom-ico {
+        width: 14px;
+        height: 14px;
+        pointer-events: none;
+    }
+
+    .zoom-btn:hover {
+        background: #1e2230;
+        border-color: #3a3e4d;
+        color: #e4e6eb;
+    }
+
+    .zoom-btn:active {
+        background: #252836;
+        transform: scale(0.94);
+    }
+
+    /* Custom range slider */
+    .zoom-slider {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 100px;
+        height: 4px;
+        border-radius: 2px;
+        background: #2a2e3d;
+        outline: none;
+        cursor: pointer;
+    }
+
+    .zoom-slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background: #00d26a;
+        border: 2px solid #0e1018;
+        cursor: pointer;
+        transition: transform 0.15s ease;
+    }
+
+    .zoom-slider::-webkit-slider-thumb:hover {
+        transform: scale(1.2);
+    }
+
+    .zoom-slider::-moz-range-thumb {
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background: #00d26a;
+        border: 2px solid #0e1018;
+        cursor: pointer;
+    }
+
+    .zoom-value {
+        font-size: 11px;
+        font-weight: 600;
+        color: #e4e6eb;
+        min-width: 36px;
+        text-align: center;
+        font-variant-numeric: tabular-nums;
+    }
+
+    /* ─── Overlay Toggle ──────────────────────────────── */
+    .overlay-toggle {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 0 10px;
+        height: 100%;
+        flex-shrink: 0;
+        -webkit-app-region: no-drag;
+    }
+
+    /* ─── File Buttons ─────────────────────────────────── */
+    .file-actions {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        padding: 0 8px;
+        height: 100%;
+        flex-shrink: 0;
+        -webkit-app-region: no-drag;
+    }
+
+    .file-btn {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        height: 24px;
+        padding: 0 10px;
+        border: 1px solid #2a2e3d;
+        border-radius: 4px;
+        background: #161922;
+        color: #c8cad0;
+        font-size: 11px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.15s ease;
+        white-space: nowrap;
+    }
+
+    .file-btn:hover {
+        background: #1e2230;
+        border-color: #3a3e4d;
+        color: #e4e6eb;
+    }
+
+    .file-btn:active {
+        background: #252836;
+        transform: scale(0.96);
+    }
+
+    .file-btn .ico {
+        width: 13px;
+        height: 13px;
+        flex-shrink: 0;
+        pointer-events: none;
+    }
+
+    .file-btn.encrypt:hover {
+        border-color: #00a854;
+        color: #00d26a;
+    }
+
+    .file-btn.decrypt:hover {
+        border-color: #c9a227;
+        color: #ffd560;
+    }
+
+    .toggle-label {
+        font-size: 11px;
+        color: #8b8fa3;
+        white-space: nowrap;
+        cursor: default;
+    }
+
+    .toggle-switch {
+        position: relative;
+        width: 30px;
+        height: 16px;
+        cursor: pointer;
+    }
+
+    .toggle-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+        position: absolute;
+    }
+
+    .toggle-track {
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: #2a2e3d;
+        border-radius: 8px;
+        transition: background 0.2s ease;
+    }
+
+    .toggle-switch input:checked + .toggle-track {
+        background: #00d26a;
+    }
+
+    .toggle-thumb {
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        width: 12px;
+        height: 12px;
+        background: #fff;
+        border-radius: 50%;
+        transition: transform 0.2s ease;
+        pointer-events: none;
+    }
+
+    .toggle-switch input:checked ~ .toggle-thumb {
+        transform: translateX(14px);
+    }
+
+    /* ─── Window Controls ────────────────────────────────── */
+    .window-controls {
+        display: flex;
+        align-items: center;
+        height: 100%;
+        flex-shrink: 0;
+        -webkit-app-region: no-drag;
+    }
+
+    .win-btn {
+        width: 46px;
+        height: 36px;
+        border: none;
+        background: transparent;
+        color: #8b8fa3;
+        font-size: 11px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.15s ease, color 0.15s ease;
+    }
+
+    .win-btn:hover {
+        background: #1e2230;
+        color: #e4e6eb;
+    }
+
+    .win-btn.close:hover {
+        background: #e81123;
+        color: #fff;
+    }
+
+    /* SVG icons for window buttons */
+    .win-btn svg {
+        width: 10px;
+        height: 10px;
+        stroke: currentColor;
+        stroke-width: 1.2;
+        fill: none;
+    }
+</style>
+</head>
+<body>
+
+    <!-- Logo -->
+    <div class="toolbar-logo">
+        <div class="toolbar-logo-icon"></div>
+        <span class="toolbar-logo-text">CryptoMAX</span>
+        <span class="toolbar-logo-ver">v1.10</span>
+    </div>
+
+    <div class="toolbar-sep"></div>
+
+    <!-- Zoom Controls -->
+    <div class="zoom-controls">
+        <span class="zoom-label">Масштаб</span>
+        <button class="zoom-btn" id="zoomOut" title="Уменьшить (−)">
+            <svg class="zoom-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+        </button>
+        <input type="range" class="zoom-slider" id="zoomSlider"
+               min="70" max="120" step="5" value="90">
+        <button class="zoom-btn" id="zoomIn" title="Увеличить (+)">
+            <svg class="zoom-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+        </button>
+        <span class="zoom-value" id="zoomValue">90%</span>
+    </div>
+
+    <!-- Overlay Toggle -->
+    <div class="overlay-toggle">
+        <span class="toggle-label">Дешифр.</span>
+        <label class="toggle-switch" title="Показать/скрыть оверлеи дешифровки">
+            <input type="checkbox" id="overlayToggle" checked>
+            <span class="toggle-track"></span>
+            <span class="toggle-thumb"></span>
+        </label>
+    </div>
+
+    <!-- Encrypted File Actions -->
+    <div class="file-actions">
+        <button class="file-btn encrypt" id="btnEncryptFile" title="Зашифровать файлы паролем чата и отправить в чат">
+            <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 17.93 8.8l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>Файл
+        </button>
+        <button class="file-btn decrypt" id="btnDecryptFile" title="Расшифровать ZIP: выбрать архив → распаковать файлы (или просто скачать zip из чата)">
+            <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Расшифр.
+        </button>
+    </div>
+
+    <!-- Drag spacer (takes remaining space) -->
+    <div class="drag-spacer"></div>
+
+    <!-- Window Controls (right side) -->
+    <div class="window-controls">
+        <button class="win-btn" id="btnMinimize" title="Свернуть">
+            <svg viewBox="0 0 10 10"><line x1="0" y1="5" x2="10" y2="5"/></svg>
+        </button>
+        <button class="win-btn" id="btnMaximize" title="Развернуть">
+            <svg viewBox="0 0 10 10"><rect x="0.5" y="0.5" width="9" height="9" rx="1"/></svg>
+        </button>
+        <button class="win-btn close" id="btnClose" title="Закрыть">
+            <svg viewBox="0 0 10 10"><line x1="0" y1="0" x2="10" y2="10"/><line x1="10" y1="0" x2="0" y2="10"/></svg>
+        </button>
+    </div>
+
+<script>
+(function() {
+    'use strict';
+
+    var slider = document.getElementById('zoomSlider');
+    var zoomValue = document.getElementById('zoomValue');
+    var zoomIn = document.getElementById('zoomIn');
+    var zoomOut = document.getElementById('zoomOut');
+    var btnMinimize = document.getElementById('btnMinimize');
+    var btnMaximize = document.getElementById('btnMaximize');
+    var btnClose = document.getElementById('btnClose');
+    var overlayToggle = document.getElementById('overlayToggle');
+    var btnEncryptFile = document.getElementById('btnEncryptFile');
+    var btnDecryptFile = document.getElementById('btnDecryptFile');
+
+    var ZOOM_MIN = 70;
+    var ZOOM_MAX = 120;
+    var ZOOM_STEP = 5;
+    var currentZoom = 90; // default
+    var isSettingFromExternal = false;
+
+    // ─── Zoom Update ──────────────────────────────────────
+    function updateZoomUI(pct) {
+        currentZoom = Math.round(pct);
+        slider.value = currentZoom;
+        zoomValue.textContent = currentZoom + '%';
+    }
+
+    function applyZoom(pct) {
+        var zoomLevel = pct / 100;
+        if (window.ToolbarAPI) {
+            window.ToolbarAPI.setZoom(zoomLevel).then(function(result) {
+                if (result && result.success) {
+                    updateZoomUI(Math.round(result.zoom * 100));
+                }
+            });
+        }
+    }
+
+    // ─── Slider ───────────────────────────────────────────
+    slider.addEventListener('input', function() {
+        updateZoomUI(parseInt(slider.value, 10));
+    });
+
+    slider.addEventListener('change', function() {
+        applyZoom(parseInt(slider.value, 10));
+    });
+
+    // ─── Buttons ──────────────────────────────────────────
+    zoomIn.addEventListener('click', function() {
+        var next = Math.min(ZOOM_MAX, currentZoom + ZOOM_STEP);
+        applyZoom(next);
+    });
+
+    zoomOut.addEventListener('click', function() {
+        var next = Math.max(ZOOM_MIN, currentZoom - ZOOM_STEP);
+        applyZoom(next);
+    });
+
+    // ─── Window Controls ──────────────────────────────────
+    btnMinimize.addEventListener('click', function() {
+        if (window.ToolbarAPI) window.ToolbarAPI.windowControl('minimize');
+    });
+
+    btnMaximize.addEventListener('click', function() {
+        if (window.ToolbarAPI) window.ToolbarAPI.windowControl('maximize');
+    });
+
+    btnClose.addEventListener('click', function() {
+        if (window.ToolbarAPI) window.ToolbarAPI.windowControl('close');
+    });
+
+    // ─── Overlay Toggle ────────────────────────────────
+    overlayToggle.addEventListener('change', function() {
+        var enabled = overlayToggle.checked;
+        if (window.ToolbarAPI) {
+            window.ToolbarAPI.toggleOverlays(enabled);
+        }
+    });
+
+    // ─── Encrypted File Actions ───────────────────────────
+    // Lucide SVG icons for states (offline, embedded)
+    var ICO_LOADING = '<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>';
+    var ICO_CHECK = '<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+
+    function setFileBtnState(btn, state, origHtml, busyLabel, doneLabel) {
+        if (state === 'loading') {
+            btn.innerHTML = ICO_LOADING + busyLabel;
+            btn.disabled = true;
+            btn.style.opacity = '0.6';
+        } else if (state === 'done') {
+            btn.innerHTML = ICO_CHECK + doneLabel;
+            btn.disabled = false;
+            btn.style.opacity = '';
+            setTimeout(function() { btn.innerHTML = origHtml; }, 1800);
+        } else { // idle
+            btn.innerHTML = origHtml;
+            btn.disabled = false;
+            btn.style.opacity = '';
+        }
+    }
+
+    btnEncryptFile.addEventListener('click', function() {
+        if (!window.ToolbarAPI || !window.ToolbarAPI.encryptFiles) return;
+        var origHtml = btnEncryptFile.innerHTML;
+        setFileBtnState(btnEncryptFile, 'loading', origHtml, 'Шифр...', '');
+        window.ToolbarAPI.encryptFiles().then(function(res) {
+            if (res && res.success) {
+                setFileBtnState(btnEncryptFile, 'done', origHtml, '', 'Готово');
+            } else {
+                setFileBtnState(btnEncryptFile, 'idle', origHtml);
+            }
+        }).catch(function() {
+            setFileBtnState(btnEncryptFile, 'idle', origHtml);
+        });
+    });
+
+    btnDecryptFile.addEventListener('click', function() {
+        if (!window.ToolbarAPI || !window.ToolbarAPI.decryptFile) return;
+        var origHtml = btnDecryptFile.innerHTML;
+        setFileBtnState(btnDecryptFile, 'loading', origHtml, '...', '');
+        window.ToolbarAPI.decryptFile().then(function(res) {
+            if (res && res.success) {
+                setFileBtnState(btnDecryptFile, 'done', origHtml, '', 'OK');
+            } else {
+                setFileBtnState(btnDecryptFile, 'idle', origHtml);
+            }
+        }).catch(function() {
+            setFileBtnState(btnDecryptFile, 'idle', origHtml);
+        });
+    });
+
+    // ─── Keyboard shortcuts ───────────────────────────────
+    document.addEventListener('keydown', function(e) {
+        if (e.ctrlKey && (e.key === '=' || e.key === '+')) {
+            e.preventDefault();
+            var next = Math.min(ZOOM_MAX, currentZoom + ZOOM_STEP);
+            applyZoom(next);
+        } else if (e.ctrlKey && e.key === '-') {
+            e.preventDefault();
+            var next2 = Math.max(ZOOM_MIN, currentZoom - ZOOM_STEP);
+            applyZoom(next2);
+        } else if (e.ctrlKey && e.key === '0') {
+            e.preventDefault();
+            applyZoom(100);
+        }
+    });
+
+    // ─── Load saved zoom on init ──────────────────────────
+    function init() {
+        if (window.ToolbarAPI) {
+            window.ToolbarAPI.getZoom().then(function(result) {
+                if (result && result.zoom) {
+                    updateZoomUI(Math.round(result.zoom * 100));
+                }
+            });
+            // Load saved overlay toggle state
+            window.ToolbarAPI.getOverlaysEnabled().then(function(result) {
+                if (result && typeof result.enabled === 'boolean') {
+                    overlayToggle.checked = result.enabled;
+                }
+            });
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+    if (document.readyState !== 'loading') init();
+
+})();
+</script>
+
+</body>
+</html>

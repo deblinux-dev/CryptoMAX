@@ -1,0 +1,53 @@
+{
+  "name": "cryptomax",
+  "version": "1.10.0",
+  "description": "CryptoMAX",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder",
+    "dev": "electron . --enable-logging",
+    "lint": "node -c main.js && node -c preload-max.js && node -c preload-panel.js && node -c preload-toolbar.js && node -c cm-file-crypto.js && node -c layout-analyzer.js && node -c engine/engine-loader.js && echo 'All syntax OK'"
+  },
+  "dependencies": {
+    "7zip-bin": "^5.2.0",
+    "archiver": "^7.0.1",
+    "archiver-zip-encrypted": "^2.0.0",
+    "pako": "^2.1.0"
+  },
+  "devDependencies": {
+    "electron": "^33.0.0"
+  },
+  "author": "DebLinux",
+  "license": "MIT",
+  "build": {
+    "appId": "com.cryptomax.app",
+    "productName": "CryptoMAX",
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "icon": "assets/CryptoMax.ico",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        },
+        {
+          "target": "portable",
+          "arch": ["x64"]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "perMachine": false,
+      "allowElevation": true,
+      "createDesktopShortcut": "always",
+      "createStartMenuShortcut": "always",
+      "shortcutName": "CryptoMAX",
+      "runAfterFinish": true
+    }
+  }
+}
