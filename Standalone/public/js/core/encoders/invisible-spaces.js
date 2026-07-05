@@ -32,6 +32,12 @@ const INVISIBLE_CHARS = [
 const BASE = BigInt(INVISIBLE_CHARS.length); // 8
 // MAGIC_PREFIX uses ONLY non-Zs characters (Lo category) so .trim() never strips it
 const MAGIC_PREFIX = '\u3164\u115F'; // Hangul Filler + Hangul Choseong Filler
+// SENTINEL: Halfwidth Hangul Filler (U+FFA0, Lo category) — добавляется в конец encode.
+// web.max.ru (Lexical editor) вырезает trailing whitespace (Zs category: U+00A0,
+// U+2002-2005, U+202F, U+205F) из сообщений при сохранении через .trim().
+// U+FFA0 — буква (Lo), НЕ whitespace, не вырезается .trim().
+// U+FFA0 НЕ входит в INVISIBLE_CHARS — не влияет на BigInt decode.
+const SENTINEL = '\uFFA0';
 
 // Build reverse map
 const _charToIndex = new Map();
@@ -58,7 +64,7 @@ export default class InvisibleSpacesEncoder {
      * @returns {string}
      */
     static encode(bytes) {
-        if (!bytes || bytes.length === 0) return MAGIC_PREFIX;
+        if (!bytes || bytes.length === 0) return MAGIC_PREFIX + SENTINEL;
 
         // Build combined: [MARKER, lenHi, lenLo, ...bytes]
         const lenHi = (bytes.length >> 8) & 0xFF;
@@ -87,7 +93,12 @@ export default class InvisibleSpacesEncoder {
         // Reverse: we encoded least significant digit first
         chars.reverse();
 
-        return MAGIC_PREFIX + chars.join('');
+        // SENTINEL: добавляем Hangul Filler (U+3164, Lo category) в конец.
+        // web.max.ru (Lexical editor) вырезает trailing whitespace (U+00A0,
+        // U+2002-2005, U+202F, U+205F) из сообщений при сохранении.
+        // U+3164 — это буква (Lo), НЕ whitespace, поэтому .trim() его не вырезает.
+        // Sentinel защищает данные от обрезки.
+        return MAGIC_PREFIX + chars.join('') + SENTINEL;
     }
 
     /**
@@ -98,12 +109,23 @@ export default class InvisibleSpacesEncoder {
     static decode(text) {
         if (!text || !text.startsWith(MAGIC_PREFIX)) return null;
 
-        const data = text.slice(MAGIC_PREFIX.length);
+        let data = text.slice(MAGIC_PREFIX.length);
         if (data.length === 0) return new Uint8Array(0);
 
-        // Decode from base-8 (most significant digit first)
+        // Убрать SENTINEL (U+FFA0) с конца, если есть.
+        // Новый формат (v2) добавляет SENTINEL в конец encode для защиты
+        // от вырезания trailing whitespace веб-мессенджерами.
+        // Старый формат (v1) не имеет SENTINEL — decode тоже работает.
+        if (data.endsWith(SENTINEL)) {
+            data = data.slice(0, -1);
+        }
+
+        // Decode from base-8 (most significant digit first).
+        // SENTINEL (U+FFA0) не входит в INVISIBLE_CHARS — если встретится
+        // в середине данных (маловероятно), пропускаем его.
         let M = 0n;
         for (const ch of data) {
+            if (ch === SENTINEL) continue; // пропустить sentinel (на всякий случай)
             const idx = _charToIndex.get(ch);
             if (idx === undefined) return null;
             M = M * BASE + BigInt(idx);

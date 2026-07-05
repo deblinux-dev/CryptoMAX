@@ -129,7 +129,10 @@ function extractTextFromNode(node) {
     // Основной путь: точный селектор текста bubble в web.max.ru
     var bubbleText = node.querySelector(SELECTORS.bubbleText);
     if (bubbleText) {
-        var text = extractRichText(bubbleText).trim();
+        // ВНИМАНИЕ: НЕ используем .trim() — он вырезает Unicode whitespace
+        // (U+00A0, U+2002-2005, U+202F, U+205F), которые invisible-spaces encoder
+        // использует для кодирования. Используем regex trim (только \t\n\r space).
+        var text = extractRichText(bubbleText).replace(/^[\t\n\r ]+/, '').replace(/[\t\n\r ]+$/, '');
         if (text) return text;
     }
 
@@ -139,7 +142,7 @@ function extractTextFromNode(node) {
         var spans = bubbleContent.children;
         for (var i = 0; i < spans.length; i++) {
             if (spans[i].classList && spans[i].classList.contains('text')) {
-                var t = extractRichText(spans[i]).trim();
+                var t = extractRichText(spans[i]).replace(/^[\t\n\r ]+/, '').replace(/[\t\n\r ]+$/, '');
                 if (t) return t;
             }
         }
@@ -147,7 +150,7 @@ function extractTextFromNode(node) {
 
     // Последний вариант: если сам узел — span.text
     if (node.classList && node.classList.contains('text')) {
-        var self = extractRichText(node).trim();
+        var self = extractRichText(node).replace(/^[\t\n\r ]+/, '').replace(/[\t\n\r ]+$/, '');
         if (self) return self;
     }
 
@@ -509,7 +512,7 @@ function showDecryptedOverlay(originalText, decryptedText) {
             var bubbles = main.querySelectorAll('.bubble');
             for (var i = 0; i < bubbles.length; i++) {
                 var bubbleText = bubbles[i].querySelector('.bubbleContent > span.text');
-                if (bubbleText && extractRichText(bubbleText).trim() === originalText) {
+                if (bubbleText && extractRichText(bubbleText).replace(/^[\t\n\r ]+/, '').replace(/[\t\n\r ]+$/, '') === originalText) {
                     node = bubbles[i];
                     break;
                 }
