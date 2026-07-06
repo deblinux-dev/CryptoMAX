@@ -113,6 +113,7 @@ npm install
 npm start
 
 # Или для сборки:
+npm install electron-builder --save-dev
 npm build
 ```
 
