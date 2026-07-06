@@ -49,8 +49,6 @@
       "allowToChangeInstallationDirectory": true,
       "perMachine": false,
       "allowElevation": true,
-      "createDesktopShortcut": "always",
-      "createStartMenuShortcut": "always",
       "shortcutName": "CryptoMAX",
       "runAfterFinish": true
     }
