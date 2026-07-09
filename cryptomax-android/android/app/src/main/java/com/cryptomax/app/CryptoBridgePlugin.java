@@ -178,7 +178,7 @@ public class CryptoBridgePlugin extends Plugin {
 
     @PluginMethod
     public void requestMicPermission(PluginCall call) {
-        if (hasRequiredPermissions(Manifest.permission.RECORD_AUDIO)) {
+        if (hasRequiredPermissions()) {
             JSObject ret = new JSObject();
             ret.put("granted", true);
             call.resolve(ret);
@@ -190,7 +190,7 @@ public class CryptoBridgePlugin extends Plugin {
     @PermissionCallback
     private void micPermissionCallback(PluginCall call) {
         JSObject ret = new JSObject();
-        boolean granted = hasRequiredPermissions(Manifest.permission.RECORD_AUDIO);
+        boolean granted = hasRequiredPermissions();
         ret.put("granted", granted);
         call.resolve(ret);
     }
