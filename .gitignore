@@ -152,3 +152,15 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+
+# Android build artifacts
+cryptomax-android/android/.gradle/
+cryptomax-android/android/local.properties
+cryptomax-android/android/app/build/
+cryptomax-android/android/captures/
+
+# Android native build artifacts
+cryptomax-android/android/.gradle/
+cryptomax-android/android/local.properties
+cryptomax-android/android/app/build/
+cryptomax-android/android/captures/

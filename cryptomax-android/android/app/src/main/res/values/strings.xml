@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">CryptoMAX</string>
+    <string name="title_activity_main">CryptoMAX</string>
+    <string name="package_name">com.cryptomax.app</string>
+    <string name="custom_url_scheme">com.cryptomax.app</string>
+</resources>

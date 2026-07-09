@@ -3,10 +3,6 @@ name: Build Android APK
 on:
   workflow_dispatch:
     inputs:
-      release_tag:
-        description: 'Release tag (e.g. v1.0.0). Leave empty for no release.'
-        required: false
-        default: ''
       build_type:
         description: 'Build type'
         required: true
@@ -35,7 +31,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '20'
 
       - name: Install npm dependencies
         working-directory: cryptomax-android
@@ -45,20 +41,15 @@ jobs:
         working-directory: cryptomax-android
         run: npx cap sync android
 
-      - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v3
-        with:
-          gradle-version: '8.14.5'
-
       - name: Build debug APK
         if: inputs.build_type == 'debug'
         working-directory: cryptomax-android/android
-        run: ./gradlew assembleDebug --no-daemon --stacktrace
+        run: chmod +x gradlew && ./gradlew assembleDebug --no-daemon --stacktrace
 
       - name: Build release APK
         if: inputs.build_type == 'release'
         working-directory: cryptomax-android/android
-        run: ./gradlew assembleRelease --no-daemon --stacktrace
+        run: chmod +x gradlew && ./gradlew assembleRelease --no-daemon --stacktrace
 
       - name: Upload debug APK
         if: inputs.build_type == 'debug'
@@ -75,13 +66,3 @@ jobs:
           name: cryptomax-release-apk
           path: cryptomax-android/android/app/build/outputs/apk/release/*.apk
           retention-days: 90
-
-      - name: Create GitHub Release
-        if: github.event.inputs.release_tag != '' && inputs.build_type == 'release'
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: ${{ github.event.inputs.release_tag }}
-          name: CryptoMAX ${{ github.event.inputs.release_tag }}
-          generate_release_notes: true
-          files: |
-            cryptomax-android/android/app/build/outputs/apk/release/*.apk
