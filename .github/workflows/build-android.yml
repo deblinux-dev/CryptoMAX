@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       release_tag:
-        description: 'Android release'
+        description: 'Release tag (e.g. v1.0.0). Leave empty for no release.'
         required: false
         default: ''
       build_type:
@@ -39,7 +39,7 @@ jobs:
 
       - name: Install npm dependencies
         working-directory: cryptomax-android
-        run: npm ci
+        run: npm install
 
       - name: Sync Capacitor
         working-directory: cryptomax-android
