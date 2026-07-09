@@ -1,8 +1,7 @@
 include ':app'
 
-// Capacitor Android library (added by `npx cap sync android`)
-def capacitorAndroidProject = new File(settingsDir, '../node_modules/@capacitor/android/capacitor')
-if (capacitorAndroidProject.exists()) {
-    include ':capacitor-android'
-    project(':capacitor-android').projectDir = capacitorAndroidProject
+// Apply Capacitor's auto-generated settings (includes all plugins)
+def capacitorSettingsFile = new File(settingsDir, 'capacitor.settings.gradle')
+if (capacitorSettingsFile.exists()) {
+    apply from: capacitorSettingsFile
 }
