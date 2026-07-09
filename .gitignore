@@ -5,6 +5,8 @@ Standalone/dist/
 Standalone/node_modules/
 Standalone/cryptomax-data/
 
+cryptomax-android/node_modules/
+cryptomax-android/dist/
 # Node ignore list
 #
 # # Logs

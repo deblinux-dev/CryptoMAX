@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    FileProvider paths for CryptoMAX:
+    - File downloads (cache + external)
+    - Camera photos (cache/DCIM)
+    - User-picked files (root access for SAF URIs)
+-->
+<paths>
+    <!-- App internal files -->
+    <files-path name="internal_files" path="."/>
+    <cache-path name="cache" path="."/>
+
+    <!-- External storage (general) -->
+    <external-path name="external_files" path="."/>
+    <external-files-path name="external_app_files" path="."/>
+    <external-cache-path name="external_app_cache" path="."/>
+
+    <!-- Downloads directory (where DownloadManager saves) -->
+    <external-path name="downloads" path="Download/"/>
+    <external-files-path name="app_downloads" path="Download/"/>
+
+    <!-- Camera photos -->
+    <cache-path name="camera_photos" path="DCIM/"/>
+    <external-cache-path name="external_camera_photos" path="DCIM/"/>
+
+    <!-- Root for SAF/general FileProvider access -->
+    <root-path name="root" path="/"/>
+</paths>

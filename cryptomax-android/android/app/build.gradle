@@ -1,0 +1,90 @@
+apply plugin: 'com.android.application'
+
+android {
+    namespace "com.cryptomax.app"
+    compileSdk rootProject.ext.compileSdkVersion ?: 34
+
+    defaultConfig {
+        applicationId "com.cryptomax.app"
+        minSdk rootProject.ext.minSdkVersion ?: 24
+        targetSdk rootProject.ext.targetSdkVersion ?: 34
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            minifyEnabled false
+            debuggable true
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    // Allow references to generated R classes from androidTest
+    testOptions {
+        unitTests.returnDefaultValues = true
+    }
+
+    lint {
+        abortOnError false
+        disable 'MissingTranslation'
+    }
+
+    packagingOptions {
+        resources {
+            excludes += ['META-INF/DEPENDENCIES', 'META-INF/LICENSE', 'META-INF/LICENSE.txt',
+                         'META-INF/license.txt', 'META-INF/NOTICE', 'META-INF/NOTICE.txt',
+                         'META-INF/notice.txt', 'META-INF/ASL2.0']
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    // ─── Capacitor 6.x ────────────────────────────────────
+    implementation project(':capacitor-android')
+
+    // ─── OkHttp 4.x (used by CryptoBridgePlugin for decryptTextFile) ─
+    implementation 'com.squareup.okhttp3:okhttp:4.12.0'
+
+    // ─── AndroidX core / UI ───────────────────────────────
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'androidx.core:core:1.12.0'
+    implementation 'androidx.core:core-ktx:1.12.0'
+    implementation 'androidx.webkit:webkit:1.8.0'
+    implementation 'androidx.activity:activity:1.8.2'
+    implementation 'androidx.fragment:fragment:1.6.2'
+    implementation 'com.google.android.material:material:1.11.0'
+
+    // ─── Notifications ────────────────────────────────────
+    // (NotificationCompat is already in androidx.core; this adds extras for rich styles)
+    implementation 'androidx.media:media:1.7.0'
+
+    // ─── WorkManager (background tasks) ───────────────────
+    implementation 'androidx.work:work-runtime:2.9.0'
+
+    // ─── Security: encrypted SharedPreferences (optional, future) ─
+    implementation 'androidx.security:security-crypto:1.1.0-alpha06'
+
+    // ─── Test ──────────────────────────────────────────────
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+}
+
+// Apply Capacitor's auto-generated gradle file if present (created by `npx cap sync`)
+def capacitorBuildFile = new File(rootProject.projectDir, 'capacitor.build.gradle')
+if (capacitorBuildFile.exists()) {
+    apply from: capacitorBuildFile
+}

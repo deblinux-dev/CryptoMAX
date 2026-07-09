@@ -1,0 +1,29 @@
+// Top-level build file — CryptoMAX Android (Capacitor 6.x)
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        // AGP 8.2 requires JDK 17. Compatible with compileSdk 34.
+        classpath 'com.android.tools.build:gradle:8.2.0'
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+// Apply Capacitor's auto-generated build file (defines SDK versions, applicationId).
+// Created by `npx cap sync` — safe to apply if missing.
+def capacitorBuildFile = new File(rootProject.projectDir, 'capacitor.build.gradle')
+if (capacitorBuildFile.exists()) {
+    apply from: capacitorBuildFile
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}

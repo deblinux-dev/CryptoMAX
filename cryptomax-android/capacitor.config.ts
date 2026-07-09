@@ -1,0 +1,49 @@
+import type { CapacitorConfig } from '@capacitor/cli';
+
+const config: CapacitorConfig = {
+  appId: 'com.cryptomax.app',
+  appName: 'CryptoMAX',
+  webDir: 'src',
+  // НЕ используем server.url — web.max.ru открывается в InAppBrowser (изолированный WebView)
+  // для безопасности: web.max.ru не имеет доступа к window.Capacitor и плагинам
+  android: {
+    allowMixedContent: true,
+    backgroundColor: '#0b0d13',
+    captureInput: true,
+    webContentsDebuggingEnabled: true,
+  },
+  plugins: {
+    StatusBar: {
+      style: 'DARK',
+      backgroundColor: '#0b0d13',
+    },
+    SplashScreen: {
+      launchAutoHide: true,
+      launchShowDuration: 1500,
+      backgroundColor: '#0b0d13',
+      showSpinner: true,
+      spinnerColor: '#401167',
+    },
+    Camera: {
+      androidPermissions: ['android.permission.CAMERA'],
+    },
+    LocalNotifications: {
+      smallIcon: 'ic_launcher_small',
+      iconColor: '#0fe2c2',
+    },
+    PushNotifications: {
+      android: {
+        sound: 'default',
+      },
+    },
+    Filesystem: {
+      androidPermissions: ['android.permission.READ_EXTERNAL_STORAGE', 'android.permission.WRITE_EXTERNAL_STORAGE'],
+    },
+    Keyboard: {
+      resize: 'body',
+      style: 'DARK',
+    },
+  },
+};
+
+export default config;

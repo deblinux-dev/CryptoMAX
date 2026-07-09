@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>CryptoMAX</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #0b0d13;
+      color: #e4e6eb;
+      font-family: -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+      overflow: hidden;
+    }
+    .loader {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .loader h1 { color: #0fe2c2; font-size: 24px; }
+    .loader p { color: #6c747c; font-size: 14px; }
+    .spinner {
+      width: 32px; height: 32px;
+      border: 3px solid #2a2a3c;
+      border-top-color: #0fe2c2;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <!-- Capacitor loads web.max.ru via server.url config -->
+  <!-- This page is only shown briefly as fallback -->
+  <div class="loader">
+    <h1>CryptoMAX</h1>
+    <div class="spinner"></div>
+    <p>Загрузка...</p>
+  </div>
+</body>
+</html>

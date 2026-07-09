@@ -1,0 +1,8 @@
+include ':app'
+
+// Capacitor Android library (added by `npx cap sync android`)
+def capacitorAndroidProject = new File(settingsDir, '../node_modules/@capacitor/android/capacitor')
+if (capacitorAndroidProject.exists()) {
+    include ':capacitor-android'
+    project(':capacitor-android').projectDir = capacitorAndroidProject
+}
