@@ -46,4 +46,11 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+
+    <!-- ════════════════════════════════════════════════════════
+         Launch theme — required by AndroidManifest for MainActivity
+         ════════════════════════════════════════════════════════ -->
+    <style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen">
+        <item name="android:background">@drawable/splash</item>
+    </style>
 </resources>
