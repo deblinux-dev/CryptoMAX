@@ -6,6 +6,6 @@
 
 def ext = gradle.ext
 ext.minSdkVersion = 24
-ext.compileSdkVersion = 34
-ext.targetSdkVersion = 34
+ext.compileSdkVersion = 36
+ext.targetSdkVersion = 36
 ext.applicationId = "com.cryptomax.app"

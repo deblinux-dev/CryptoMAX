@@ -1,12 +1,12 @@
-// Top-level build file — CryptoMAX Android (Capacitor 6.x)
+// Top-level build file — CryptoMAX Android (Capacitor 8.x)
 buildscript {
     repositories {
         google()
         mavenCentral()
     }
     dependencies {
-        // AGP 8.2 requires JDK 17. Compatible with compileSdk 34.
-        classpath 'com.android.tools.build:gradle:8.2.0'
+        // AGP 8.13 requires JDK 17. Compatible with compileSdk 36.
+        classpath 'com.android.tools.build:gradle:8.13.0'
     }
 }
 

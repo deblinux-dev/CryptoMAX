@@ -58,5 +58,13 @@
 	{
 		"pkg": "@capacitor/toast",
 		"classpath": "com.capacitorjs.plugins.toast.ToastPlugin"
+	},
+	{
+		"pkg": "@capgo/capacitor-inappbrowser",
+		"classpath": "ee.forgr.capacitor_inappbrowser.CapgoInAppBrowserPlugin"
+	},
+	{
+		"pkg": "@capgo/capacitor-inappbrowser",
+		"classpath": "ee.forgr.capacitor_inappbrowser.InAppBrowserPlugin"
 	}
 ]

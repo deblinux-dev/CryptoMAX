@@ -1,5 +1,5 @@
 /**
- * preload-main.js — injected into web.max.ru WebView on Android (Capacitor).
+ * preload-main.js — injected into web.max.ru InAppBrowser on Android (Capacitor).
  *
  * MUST be loaded AFTER engine-bundle.js (which exposes window.CryptoEngineAPI).
  *
@@ -12,8 +12,8 @@
  *      render overlay.
  *   3. Send encrypted text to web.max.ru input field via document.execCommand
  *      and click the Russian-labelled send button.
- *   4. Bridge to native Android via prompt() — IPC for password storage,
- *      file download, notifications, mic permission, overlay visibility.
+ *   4. Bridge to parent app via window.mobileApp.postMessage — IPC for password
+ *      storage, file download, notifications, mic permission, overlay visibility.
  *
  * NOT in this file (handled separately):
  *   - Floating UI bar  → ui-panel.js (calls window.__cm_* hooks below)
@@ -22,12 +22,13 @@
  * Security model:
  *   - _password stored in closure (NEVER on window)
  *   - Overlays use Shadow DOM (closed) — web.max.ru Svelte cannot read content
- *   - All IPC via prompt() — bypasses CSP, works on every Android System WebView
+ *   - Bridge via window.mobileApp.postMessage (InAppBrowser JS interface)
+ *   - web.max.ru CANNOT access window.Capacitor (isolated by InAppBrowser)
  *
- * Bridge protocol (prompt-based IPC):
- *   JS → Native:  prompt('__cm_bridge__' + JSON.stringify({ m, a, id }))
- *   Native → JS:  window.__cm_bridge_resolve(id, value)
- *                 window.__cm_bridge_reject(id, error)
+ * Bridge protocol (InAppBrowser postMessage IPC):
+ *   JS → Parent:  window.mobileApp.postMessage({ detail: { method, args, id } })
+ *   Parent → JS:  window.addEventListener('messageFromNative', handler)
+ *                 event.detail = { id, result }
  */
 
 (function () {
@@ -35,8 +36,15 @@
     if (window.__cm_injected) return;
 
     // ════════════════════════════════════════════════════════════
-    //  Bridge: prompt()-based IPC with native Android
+    //  Bridge: InAppBrowser postMessage IPC with parent app
     // ════════════════════════════════════════════════════════════
+    //
+    //  window.mobileApp is injected by @capgo/capacitor-inappbrowser.
+    //  It provides postMessage() for sending messages to the parent app.
+    //  The parent responds via window.postMessage → 'messageFromNative' event.
+    //
+    //  This is SECURE: web.max.ru cannot access window.Capacitor or plugins.
+    //  Only window.mobileApp.postMessage is available for communication.
 
     var _bridgeId = 0;
     var _bridgeCallbacks = {};
@@ -46,7 +54,14 @@
             var id = 'b_' + (++_bridgeId);
             _bridgeCallbacks[id] = { resolve: resolve, reject: reject };
             try {
-                prompt('__cm_bridge__' + JSON.stringify({ m: method, a: args || [], id: id }));
+                // Send message to parent app via InAppBrowser bridge
+                window.mobileApp.postMessage({
+                    detail: {
+                        method: method,
+                        args: args || [],
+                        id: id,
+                    },
+                });
             } catch (e) {
                 delete _bridgeCallbacks[id];
                 reject(e);
@@ -54,15 +69,21 @@
         });
     }
 
-    // Native side resolves via these (called from Java)
-    window.__cm_bridge_resolve = function (id, value) {
-        var cb = _bridgeCallbacks[id];
-        if (cb) { cb.resolve(value); delete _bridgeCallbacks[id]; }
-    };
-    window.__cm_bridge_reject = function (id, error) {
-        var cb = _bridgeCallbacks[id];
-        if (cb) { cb.reject(error); delete _bridgeCallbacks[id]; }
-    };
+    // Parent app responds via 'messageFromNative' event
+    // event.detail = { id, result }
+    window.addEventListener('messageFromNative', function (event) {
+        var data = event.detail || event;
+        if (!data || !data.id) return;
+        var cb = _bridgeCallbacks[data.id];
+        if (cb) {
+            if (data.result && data.result.error) {
+                cb.reject(data.result.error);
+            } else {
+                cb.resolve(data.result);
+            }
+            delete _bridgeCallbacks[data.id];
+        }
+    });
 
     // Expose for ui-panel.js (so it can call savePassword, getAllPasswords,
     // downloadFile, showNotification, requestMicPermission, etc.)

@@ -2,16 +2,6 @@
 	"appId": "com.cryptomax.app",
 	"appName": "CryptoMAX",
 	"webDir": "src",
-	"server": {
-		"androidScheme": "https",
-		"url": "https://web.max.ru",
-		"cleartext": true,
-		"allowNavigation": [
-			"*.oneme.ru",
-			"*.max.ru",
-			"web.max.ru"
-		]
-	},
 	"android": {
 		"allowMixedContent": true,
 		"backgroundColor": "#0b0d13",
