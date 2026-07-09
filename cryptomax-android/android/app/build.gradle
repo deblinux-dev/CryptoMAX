@@ -1,13 +1,19 @@
+// Apply Capacitor's auto-generated build file FIRST (defines SDK versions)
+def capacitorBuildFile = new File(rootProject.projectDir, 'capacitor.build.gradle')
+if (capacitorBuildFile.exists()) {
+    apply from: capacitorBuildFile
+}
+
 apply plugin: 'com.android.application'
 
 android {
     namespace "com.cryptomax.app"
-    compileSdk rootProject.ext.compileSdkVersion ?: 36
+    compileSdk 36
 
     defaultConfig {
         applicationId "com.cryptomax.app"
-        minSdk rootProject.ext.minSdkVersion ?: 24
-        targetSdk rootProject.ext.targetSdkVersion ?: 36
+        minSdk 24
+        targetSdk 36
         versionCode 1
         versionName "1.0"
 
@@ -30,7 +36,6 @@ android {
         targetCompatibility JavaVersion.VERSION_17
     }
 
-    // Allow references to generated R classes from androidTest
     testOptions {
         unitTests.returnDefaultValues = true
     }
@@ -69,10 +74,4 @@ dependencies {
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.2.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.6.1'
-}
-
-// Apply Capacitor's auto-generated gradle file if present (created by `npx cap sync`)
-def capacitorBuildFile = new File(rootProject.projectDir, 'capacitor.build.gradle')
-if (capacitorBuildFile.exists()) {
-    apply from: capacitorBuildFile
 }
